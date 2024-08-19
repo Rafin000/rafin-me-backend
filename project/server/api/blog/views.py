@@ -1,8 +1,7 @@
 from flask import current_app as app, request
-import requests
 from flask_restx import Resource
 from project.server.api.blog import ns_blog
-from project.server.models.blog import Blog
+from project.server.models.models import Blogs
 from project.server.api.blog.schema import *
 from project.server import db
 from project.server.utils import error_response
@@ -20,9 +19,8 @@ class Alive(Resource):
             'message': "Alive",
         }
         return response_object, 200
-    
 
-class BlogPost(Resource):
+class BlogList(Resource):
     @ns_blog.expect(create_blog_model, validate=True)
     @ns_blog.response(200, "Successfully Created Blog")
     @ns_blog.response(400, "Unable to Create Blog")
@@ -30,13 +28,21 @@ class BlogPost(Resource):
         try:
             data = request.get_json()
             title = data.get('title')
+            summary = data.get('summary')
+            reading_time = data.get('reading_time')
+            thumbnail_url = data.get('thumbnail_url')
+            tags = data.get('tags')
             content = data.get('content')
             author = data.get('author')
 
-            blog = Blog(
+            blog = Blogs(
                 title = title, 
                 content = content, 
-                author = author
+                author = author,
+                summary = summary,
+                reading_time = reading_time,
+                thumbnail_url = thumbnail_url,
+                tags = tags
                 )
             
             db.session.add(blog)
@@ -49,40 +55,24 @@ class BlogPost(Resource):
             app.logger.info(e)
             return error_response(400, "Unable to Create Blog")
         
+
     @ns_blog.response(200, "Successfully Retrieved Blogs")
     @ns_blog.response(400, "Unable to retrieve blogs")
-    # def get(self):
-    #     try:
-    #         blogs = Blog.query.order_by(Blog.created_at.desc()).all()
-    #         serialized_blogs = []
-    #         for blog in blogs:
-    #             serialized_blogs.append({
-    #                 'id': str(blog.id),
-    #                 'title': blog.title,
-    #                 'content': blog.content,
-    #                 'author': blog.author,
-    #                 'created_at': blog.created_at.timestamp(),
-    #                 'updated_at': blog.updated_at.timestamp()
-    #             })
-    #         app.logger.info(serialized_blogs)
-    #         return {
-    #             'message' : "Successfully Retrieved Blogs",
-    #             'data' : serialized_blogs
-    #         }, 200
-    #     except Exception as e:
-    #         app.logger.error(e)
-    #         return error_response(400, "Unable to retrieve blogs")
     def get(self):
         try:
             page = request.args.get('page', 1, type=int)
             per_page = request.args.get('per_page', 10, type=int)
 
-            blogs = Blog.query.order_by(Blog.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+            blogs = Blogs.query.order_by(Blog.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
             serialized_blogs = []
             for blog in blogs.items:
                 serialized_blogs.append({
                     'id': str(blog.id),
                     'title': blog.title,
+                    'summary': blog.summary,
+                    'reading_time': blog.reading_time,
+                    'thumbnail_url': blog.thumbnail_url,
+                    'tags': blog.tags,
                     'content': blog.content,
                     'author': blog.author,
                     'created_at': blog.created_at.timestamp(),
@@ -99,21 +89,56 @@ class BlogPost(Resource):
         except Exception as e:
             app.logger.error(e)
             return error_response(400, "Unable to retrieve blogs")
+
+
+class Blog(Resource):                
+    @ns_blog.response(200, "Successfully Retrieved Blog")
+    @ns_blog.response(400, "Unable to Retrieve Blog")
+    def get(self, blog_id):
+        try:
+            blog = Blogs.query.filter_by(id=blog_id).first()
+
+            if not blog:
+                return error_response(400, "Blog not found")
+
+            serialized_blog = {
+                'id': str(blog.id),
+                'title': blog.title,
+                'summary': blog.summary,
+                'reading_time': blog.reading_time,
+                'thumbnail_url': blog.thumbnail_url,
+                'tags': blog.tags,
+                'content': blog.content,
+                'author': blog.author,
+                'created_at': blog.created_at.timestamp(),
+                'updated_at': blog.updated_at.timestamp()
+            }
+
+            return {
+                'message': "Successfully Retrieved Blog",
+                'data': serialized_blog
+            }, 200
+        except Exception as e:
+            app.logger.error(e)
+            return error_response(400, "Unable to Retrieve Blog")
         
-        
+
     @ns_blog.expect(update_blog_model, validate=True)
     @ns_blog.response(200, "Successfully Updated Blog")
     @ns_blog.response(400, "Unable to Update Blog")
-    def put(self):
+    def put(self, blog_id):
         try:
             data = request.get_json()
-            blog_id = data.get('blog_id')
-            blog = Blog.query.filter_by(id=blog_id).first()
+            blog = Blogs.query.filter_by(id=blog_id).first()
 
             if not blog:
                 return error_response(400, "Blog not found")
 
             blog.title = data.get('title', blog.title)
+            blog.summary = data.get('summary', blog.summary)
+            blog.reading_time = data.get('reading_time', blog.reading_time)
+            blog.thumbnail_url = data.get('thumbnail_url', blog.thumbnail_url)
+            blog.tags = data.get('tags', blog.tags)
             blog.content = data.get('content', blog.content)
             blog.author = data.get('author', blog.author)
             
@@ -127,14 +152,11 @@ class BlogPost(Resource):
             return error_response(400, "Unable to Update Blog")
 
 
-    @ns_blog.expect(delete_blog_model, validate=True)
     @ns_blog.response(200, "Successfully Deleted Blog")
     @ns_blog.response(400, "Unable to Delete Blog")
-    def delete(self):
+    def delete(self, blog_id):
         try:
-            data = request.get_json()
-            blog_id = data.get('blog_id')
-            blog = Blog.query.filter_by(id=blog_id).first()
+            blog = Blogs.query.filter_by(id=blog_id).first()
 
             if not blog:
                 return error_response(400, "Blog not found")
@@ -150,4 +172,5 @@ class BlogPost(Resource):
             return error_response(400, "Unable to Delete Blog")
 
 ns_blog.add_resource(Alive, "/alive", endpoint="alive-blog-view")
-ns_blog.add_resource(BlogPost, "/blog",  endpoint="blog")
+ns_blog.add_resource(BlogList, "/",  endpoint="blog-list")
+ns_blog.add_resource(Blog, "/<string:blog_id>",  endpoint="blog")
