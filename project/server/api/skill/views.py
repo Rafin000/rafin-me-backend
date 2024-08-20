@@ -1,6 +1,7 @@
 from flask import request
 from flask import current_app as app
 from flask_restx import Resource
+from sqlalchemy.dialects.postgresql import JSONB
 from project.server.models.models import Users
 from project.server.api.skill.schema import *
 from project.server.api.skill import ns_user_skill
@@ -11,27 +12,33 @@ class UserSkillResource(Resource):
     @ns_user_skill.expect(create_skill_model, validate=True)
     @ns_user_skill.response(201, 'Skill successfully added')
     @ns_user_skill.response(400, 'Validation Error')
+    @ns_user_skill.response(404, 'User not found')
     @ns_user_skill.response(500, 'Internal Server Error')
     def post(self, user_id):
         try:
             data = request.get_json()
             skill = data.get('skill')
+            icon_link = data.get('icon_link')
 
-            if not skill:
-                return error_response(400, 'Skill is required')
+            if not skill or not icon_link:
+                return error_response(400, 'Skill and icon link are required')
 
             user = Users.query.filter_by(id=user_id).first()
             if not user:
                 return error_response(404, 'User not found')
-            print(user.skills)
-            if user.skills:
-                if skill in user.skills:
-                    return error_response(400, 'Skill already exists')
-                user.skills = list(set(user.skills + [skill]))
-            else:
-                user.skills = [skill]
+
+            if user.skills is None:
+                user.skills = []
+
+            existing_skills = {s['skill'] for s in user.skills}
+            if skill in existing_skills:
+                return error_response(400, 'Skill already exists')
+
+            user.skills.append({'skill': skill, 'icon_link': icon_link})
+            app.logger.info(f"Adding skill to user ID {user_id}")
 
             db.session.commit()
+
             return {'message': 'Skill added successfully'}, 201
         except Exception as e:
             app.logger.error(f"Error adding skill for user ID {user_id}: {e}")
@@ -46,20 +53,25 @@ class UserSkillResource(Resource):
             user = Users.query.filter_by(id=user_id).first()
             if not user:
                 return error_response(404, 'User not found')
+                
             data = request.get_json()
             skill = data.get('skill')
 
             if not skill:
                 return error_response(400, 'Skill is required')
             
-            if user.skills and skill in user.skills:
-                user.skills = [s for s in user.skills if s != skill]
+            if user.skills:
+                skills_to_keep = [s for s in user.skills if s['skill'] != skill]
+                if len(skills_to_keep) == len(user.skills):
+                    return error_response(404, 'Skill not found')
+                user.skills = skills_to_keep or JSONB('[]')
                 db.session.commit()
                 return {'message': 'Skill deleted successfully'}, 200
             else:
-                return error_response(404, 'Skill not found')
+                return error_response(404, 'No skills found for the user')
+            
         except Exception as e:
             app.logger.error(f"Error deleting skill for user ID {user_id}: {e}")
             return error_response(500, 'Internal Server Error')
 
-ns_user_skill.add_resource(UserSkillResource, '/<string:user_id>')
+ns_user_skill.add_resource(UserSkillResource, '/<string:user_id>/skills')

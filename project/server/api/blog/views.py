@@ -31,19 +31,19 @@ class BlogList(Resource):
             summary = data.get('summary')
             reading_time = data.get('reading_time')
             thumbnail_url = data.get('thumbnail_url')
-            tags = data.get('tags')
+            tags = data.get('tags', [])
             content = data.get('content')
             author = data.get('author')
 
             blog = Blogs(
-                title = title, 
-                content = content, 
-                author = author,
-                summary = summary,
-                reading_time = reading_time,
-                thumbnail_url = thumbnail_url,
-                tags = tags
-                )
+                title=title, 
+                content=content, 
+                author=author,
+                summary=summary,
+                reading_time=reading_time,
+                thumbnail_url=thumbnail_url,
+                tags=tags
+            )
             
             db.session.add(blog)
             db.session.commit()
@@ -63,7 +63,7 @@ class BlogList(Resource):
             page = request.args.get('page', 1, type=int)
             per_page = request.args.get('per_page', 10, type=int)
 
-            blogs = Blogs.query.order_by(Blog.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+            blogs = Blogs.query.order_by(Blogs.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
             serialized_blogs = []
             for blog in blogs.items:
                 serialized_blogs.append({

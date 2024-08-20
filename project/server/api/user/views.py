@@ -18,6 +18,8 @@ class UserList(Resource):
                 full_name=data['full_name'],
                 designation=data['designation'],
                 about=data.get('about'),
+                cv_link=data.get('cv_link'),
+                profile_picture_link=data.get('profile_picture_link'),
                 skills=data.get('skills')
             )
             db.session.add(new_user)
@@ -39,6 +41,8 @@ class UserList(Resource):
                     'full_name': user.full_name,
                     'designation': user.designation,
                     'about': user.about,
+                    'cv_link': user.cv_link,
+                    'profile_picture_link': user.profile_picture_link,
                     'skills': user.skills
                 } for user in users
             ]
@@ -63,6 +67,8 @@ class User(Resource):
                 'full_name': user.full_name,
                 'designation': user.designation,
                 'about': user.about,
+                'cv_link': user.cv_link,
+                'profile_picture_link': user.profile_picture_link,
                 'skills': user.skills,
                 'testimonials': [
                     {
@@ -101,21 +107,28 @@ class User(Resource):
             user.full_name = data.get('full_name', user.full_name)
             user.designation = data.get('designation', user.designation)
             user.about = data.get('about', user.about)
-            new_skills = data.get('skills', [])
-            
-            if not isinstance(new_skills, list):
-                return error_response(400, "Skills should be a list")
+            user.cv_link = data.get('cv_link', user.cv_link)
+            user.profile_picture_link = data.get('profile_picture_link', user.profile_picture_link)
 
-            if user.skills:
-                existing_skills = set(user.skills)
-            else:
-                existing_skills = set()
+            # new_skills = data.get('skills', [])
+            # if not isinstance(new_skills, list):
+            #     return error_response(400, "Skills should be a list")
 
-            for skill in new_skills:
-                if skill not in existing_skills:
-                    existing_skills.add(skill)
+            # existing_skill_names = {skill['skill'] for skill in (user.skills or [])}
 
-            user.skills = list(existing_skills)
+            # validated_skills = []
+            # seen_skill_names = set()
+            # for skill in new_skills:
+            #     if not isinstance(skill, dict) or 'skill' not in skill or 'icon_link' not in skill:
+            #         return error_response(400, "Each skill should be an object with 'skill' and 'icon_link' keys")
+            #     if skill['skill'] in existing_skill_names:
+            #         return error_response(400, f"Skill with skill '{skill['skill']}' already exists")
+            #     if skill['skill'] in seen_skill_names:
+            #         continue 
+            #     seen_skill_names.add(skill['skill'])
+            #     validated_skills.append(skill)
+
+            # user.skills = validated_skills
             
             db.session.commit()
 
@@ -123,7 +136,6 @@ class User(Resource):
         except Exception as e:
             app.logger.error(e)
             return error_response(400, "Unable to Update User")
-
 
     @ns_user.response(200, "Successfully Deleted User")
     @ns_user.response(400, "Unable to Delete User")
@@ -140,43 +152,5 @@ class User(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Delete User")
 
-
-# class UserSkill(Resource):
-#     # @ns_user.expect(create_skill_model, validate=True)
-#     @ns_user.response(201, 'Skill successfully added')
-#     @ns_user.response(400, 'Validation Error')
-#     @ns_user.response(500, 'Internal Server Error')
-#     def post(self, user_id):
-#         try:
-#             data = request.get_json()
-#             skill = data.get('skill')
-
-#             if not skill:
-#                 app.logger.warning(f"Post request failed: 'skill' is required for user ID {user_id}")
-#                 return error_response(400, 'Skill is required')
-
-#             app.logger.info(f"Attempting to add skill '{skill}' for user ID {user_id}")
-
-#             user = Users.query.filter_by(id=user_id).first()
-#             if not user:
-#                 app.logger.warning(f"User with ID {user_id} not found")
-#                 return error_response(404, 'User not found')
-
-#             if user.skills:
-#                 if skill in user.skills:
-#                     app.logger.warning(f"Skill '{skill}' already exists for user ID {user_id}")
-#                     return error_response(400, 'Skill already exists')
-#                 user.skills.append(skill)
-#             else:
-#                 user.skills = [skill]
-
-#             db.session.commit()
-#             app.logger.info(f"Skill '{skill}' added successfully for user ID {user_id}")
-#             return {'message': 'Skill added successfully'}, 201
-#         except Exception as e:
-#             app.logger.error(f"Error adding skill for user ID {user_id}: {e}")
-#             return error_response(500, 'Internal Server Error')
-        
 ns_user.add_resource(UserList, '/')
 ns_user.add_resource(User, '/<string:user_id>')
-# ns_user.add_resource(UserSkill, '/<string:user_id>/skills')

@@ -12,7 +12,6 @@ create_blog_type = Model('CreateBlog',{
 })
 
 update_blog_type = Model('UpdateBlog',{
-    'blog_id': fields.String(required=True, description='Blog ID'),
     'title': fields.String(description='Blog Title'),
     'summary': fields.String(description='Blog Summary'),
     'reading_time': fields.Integer(description='Reading Time in Minutes'),

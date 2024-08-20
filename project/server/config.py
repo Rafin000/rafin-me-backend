@@ -13,10 +13,15 @@ class BaseConfig:
     SECRET_KEY = os.getenv('SECRET_KEY', '63eaQmNBpg')
     API_KEY = os.environ.get("API_KEY", "@Beginning@After@the@ENd@")
     DEBUG = False
+    MAIL_USERNAME="marufulislam00000@gmail.com"
+    MAIL_PASSWORD="jwuywnewjqnlxvbu"
+    MAIL_PORT=465
+    MAIL_USE_TLS=False
+    MAIL_USE_SSL=True
+    MAIL_SERVER="smtp.gmail.com"
     BCRYPT_LOG_ROUNDS = 13
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-
+    
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration."""
