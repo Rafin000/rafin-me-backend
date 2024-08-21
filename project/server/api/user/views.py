@@ -92,7 +92,7 @@ class User(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Retrieve User")
 
-    @ns_user.expect(update_user_model, validate=True)
+    # @ns_user.expect(update_user_model, validate=True)
     @ns_user.response(200, "Successfully Updated User")
     @ns_user.response(400, "Unable to Update User")
     def put(self, user_id):
