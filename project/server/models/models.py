@@ -36,25 +36,43 @@ class Users(db.Model):
     full_name = Column(String(255), nullable=False)
     designation = Column(String(255), nullable=False)
     about = Column(String, nullable=True)
-    skills = Column(JSON, nullable=True)
     cv_link = Column(String, nullable=True)
     profile_picture_link = Column(String, nullable=True)
 
     testimonials = db.relationship('Testimonials', backref='author', lazy=True)
     social_media_links = db.relationship('SocialMediaLinks', backref='owner', lazy=True)
+    user_skills = db.relationship('UserSkills', backref='skill_owner', lazy=True)
 
     def __init__(self, full_name, username, designation, about=None, skills=None, cv_link=None, profile_picture_link=None):
         self.full_name = full_name
         self.username = username
         self.designation = designation
         self.about = about
-        self.skills = skills if skills else []
         self.cv_link = cv_link
         self.profile_picture_link = profile_picture_link
 
     def __repr__(self):
         return f'<User {self.id} - {self.full_name}>'
 
+
+class UserSkills(db.Model):
+    __tablename__ = 'user_skills'
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    skill = Column(String(255), nullable=False)
+    icon_link = Column(String(255), nullable=False)
+
+    user = db.relationship('Users', backref=db.backref('skills', lazy=True))
+
+    def __init__(self, user_id, skill, icon_link):
+        self.user_id = user_id
+        self.skill = skill
+        self.icon_link = icon_link
+
+    def __repr__(self):
+        return f'<UserSkills {self.id} - {self.skill}>'
+    
 class SocialMediaLinks(db.Model):
     __tablename__ = 'social_media_links'  
 
