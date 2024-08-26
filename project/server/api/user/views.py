@@ -83,7 +83,8 @@ class User(Resource):
                         'date': testimonial.date.isoformat(),  
                         'designation': testimonial.designation,
                         'content': testimonial.content,
-                        'company': testimonial.company
+                        'company': testimonial.company,
+                        'image_link': testimonial.image_link
                     } for testimonial in user.testimonials
                 ],
                 'social_media_links': {

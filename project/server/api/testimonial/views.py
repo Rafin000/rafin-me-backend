@@ -87,7 +87,7 @@ class Testimonial(Resource):
             testimonial.content = data.get('content', testimonial.content)
             testimonial.designation = data.get('designation', testimonial.designation)
             testimonial.company = data.get('company', testimonial.company)
-            testimonial.company = data.get('image_link', testimonial.image_link)
+            testimonial.image_link = data.get('image_link', testimonial.image_link)
             
             
             db.session.commit()
