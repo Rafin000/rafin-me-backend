@@ -60,7 +60,6 @@ class User(Resource):
             if not user:
                 return error_response(400, "User not found")
 
-            # Serialize user data
             serialized_user = {
                 'id': str(user.id), 
                 'username': user.username,
@@ -92,7 +91,27 @@ class User(Resource):
                     'linkedin': user.social_media_links[0].linkedin if user.social_media_links else None,
                     'instagram': user.social_media_links[0].instagram if user.social_media_links else None,
                     'github': user.social_media_links[0].github if user.social_media_links else None
-                }
+                },
+                'experiences' : [
+                    {
+                        'id' : str(experience.id),
+                        'user_id' : str(experience.user_id),
+                        'year' : experience.year,
+                        'position' : experience.position,
+                        'company' : experience.company,
+                        'contributions' : [contribution for contribution in experience.work_details]
+                    } for experience in user.experience
+                ],
+                'education' : [
+                    {
+                        'id' : str(education.id),
+                        'user_id' : str(education.user_id),
+                        'year' : education.year,
+                        'degree' : education.degree,
+                        'university' : education.university,
+                        'cgpa' : education.cgpa,
+                    } for education in user.education
+                ]
             }
             return {"message": "Successfully Retrieved User", "data": serialized_user}, 200
         except Exception as e:

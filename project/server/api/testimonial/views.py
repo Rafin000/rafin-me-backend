@@ -18,7 +18,8 @@ class TestimonialList(Resource):
                 name=data['name'],
                 content=data['content'],
                 designation=data.get('designation'),
-                company=data.get('company')
+                company=data.get('company'),
+                image_link=data.get('image_link')
             )
             db.session.add(new_testimonial)
             db.session.commit()
@@ -39,7 +40,8 @@ class TestimonialList(Resource):
                     'name': testimonial.name,
                     'content': testimonial.content,
                     'designation': testimonial.designation,
-                    'company': testimonial.company
+                    'company': testimonial.company,
+                    'image_link': testimonial.image_link
                 } for testimonial in testimonials
             ]
             return {"message": "Successfully Retrieved Testimonials", "data": serialized_testimonials}, 200
@@ -62,7 +64,8 @@ class Testimonial(Resource):
                 'name': testimonial.name,
                 'content': testimonial.content,
                 'designation': testimonial.designation,
-                'company': testimonial.company
+                'company': testimonial.company,
+                'image_link': testimonial.image_link
             }
             return {"message": "Successfully Retrieved Testimonial", "data": serialized_testimonial}, 200
         except Exception as e:
@@ -84,6 +87,8 @@ class Testimonial(Resource):
             testimonial.content = data.get('content', testimonial.content)
             testimonial.designation = data.get('designation', testimonial.designation)
             testimonial.company = data.get('company', testimonial.company)
+            testimonial.company = data.get('image_link', testimonial.image_link)
+            
             
             db.session.commit()
             return {"message": "Successfully Updated Testimonial"}, 200

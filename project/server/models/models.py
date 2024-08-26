@@ -39,9 +39,11 @@ class Users(db.Model):
     cv_link = Column(String, nullable=True)
     profile_picture_link = Column(String, nullable=True)
 
-    testimonials = db.relationship('Testimonials', backref='author', lazy=True)
-    social_media_links = db.relationship('SocialMediaLinks', backref='owner', lazy=True)
-    user_skills = db.relationship('UserSkills', backref='skill_owner', lazy=True)
+    testimonials = db.relationship('Testimonials', backref='user_testimonials', lazy=True)
+    social_media_links = db.relationship('SocialMediaLinks', backref='user_social_links', lazy=True)
+    user_skills = db.relationship('UserSkills', backref='user_skills', lazy=True)
+    education = db.relationship('Education', backref='user_education', lazy=True, cascade="all, delete-orphan")
+    experience = db.relationship('Experience', backref='user_experience', lazy=True, cascade="all, delete-orphan")
 
     def __init__(self, full_name, username, designation, about=None, skills=None, cv_link=None, profile_picture_link=None):
         self.full_name = full_name
@@ -105,6 +107,7 @@ class Testimonials(db.Model):
     designation = Column(String(255), nullable=False)
     company = Column(String(255), nullable=False)
     content = Column(String, nullable=False)
+    image_link = Column(String(255), nullable=True)
 
     user = db.relationship('Users', backref=db.backref('testimonials_list', lazy=True))
 
@@ -119,3 +122,40 @@ class Testimonials(db.Model):
 
     def __repr__(self):
         return f'<Testimonial {self.id} - {self.name}>'
+
+
+class Education(db.Model):
+    __tablename__ = 'education'
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    year = db.Column(db.String(255), nullable=False)
+    degree = db.Column(db.String(255), nullable=False)
+    university = db.Column(db.String(255), nullable=False)
+    cgpa = db.Column(db.String(255), nullable=False)
+
+    def __init__(self, user_id, year, degree, university, cgpa):
+        self.user_id = user_id
+        self.year = year
+        self.degree = degree
+        self.university = university
+        self.cgpa = cgpa
+
+
+
+class Experience(db.Model):
+    __tablename__ = 'experience'
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    year = db.Column(db.String(255), nullable=False)
+    position = db.Column(db.String(255), nullable=False)
+    company = db.Column(db.String(255), nullable=False)
+    work_details = db.Column(ARRAY(db.String), nullable=True)
+
+    def __init__(self, user_id, year, position, company, work_details):
+        self.user_id = user_id
+        self.year = year
+        self.position = position
+        self.company = company
+        self.work_details = work_details
