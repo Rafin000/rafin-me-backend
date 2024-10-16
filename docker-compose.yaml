@@ -1,0 +1,44 @@
+version: "3.8"
+services:
+  # frontend:
+  #   image: imageName
+  #   restart: always
+  #   ports:
+  #     - 8080:80
+  #   depends_on:
+  #     - backend
+  # admin-frontend:
+  #   image: imageName
+  #   restart: always
+  #   ports:
+  #     - 8081:80
+  #   depends_on:
+  #     - backend
+  backend:
+    image: imageName
+    restart: always
+    ports:
+      - 8000:8000
+    environment:
+      - SECRET_KEY=my_secret_key
+      - APP_SETTINGS=project.config.DevelopmentConfig
+      - DATABASE_URL=postgresql://postgres:drive@postgres:5432/connect_s3
+      - FLASK_APP=manage.py
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:13-alpine
+    expose:
+      - 5432
+    ports:
+      - 5433:5432
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres 
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pg:/var/lib/postgresql/data
+volumes:
+  pg:
+    driver: local
+

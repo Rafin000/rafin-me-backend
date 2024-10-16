@@ -6,22 +6,22 @@ from project.server import db
 from project.server.utils import error_response
 
 class EducationList(Resource):
-    # def post(self):
-    #     try:
-    #         data = request.get_json()
-    #         new_education = Education(
-    #             user_id=data['user_id'],
-    #             year=data['year'],
-    #             degree=data['degree'],
-    #             university=data['university'],
-    #             cgpa=data.get('cgpa')
-    #         )
-    #         db.session.add(new_education)
-    #         db.session.commit()
-    #         return {"message": "Successfully Created Education"}, 201
-    #     except Exception as e:
-    #         app.logger.error(e)
-    #         return error_response(400, "Unable to Create Education")
+    def post(self):
+        try:
+            data = request.get_json()
+            new_education = Education(
+                user_id=data['user_id'],
+                year=data['year'],
+                degree=data['degree'],
+                university=data['university'],
+                cgpa=data.get('cgpa')
+            )
+            db.session.add(new_education)
+            db.session.commit()
+            return {"message": "Successfully Created Education"}, 201
+        except Exception as e:
+            app.logger.error(e)
+            return error_response(400, "Unable to Create Education")
 
     def get(self):
         try:
