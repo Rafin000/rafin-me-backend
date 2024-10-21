@@ -1,6 +1,7 @@
 from flask import current_app as app, request
 from flask_restx import Resource
 from project.server.api.blog import ns_blog
+from project.server.docorators import check_apikey
 from project.server.models.models import Blogs
 from project.server.api.blog.schema import *
 from project.server import db
@@ -21,6 +22,7 @@ class Alive(Resource):
         return response_object, 200
 
 class BlogList(Resource):
+    @check_apikey
     @ns_blog.expect(create_blog_model, validate=True)
     @ns_blog.response(200, "Successfully Created Blog")
     @ns_blog.response(400, "Unable to Create Blog")
@@ -56,6 +58,7 @@ class BlogList(Resource):
             return error_response(400, "Unable to Create Blog")
         
 
+    @check_apikey
     @ns_blog.response(200, "Successfully Retrieved Blogs")
     @ns_blog.response(400, "Unable to retrieve blogs")
     def get(self):
@@ -91,7 +94,8 @@ class BlogList(Resource):
             return error_response(400, "Unable to retrieve blogs")
 
 
-class Blog(Resource):                
+class Blog(Resource):   
+    @check_apikey             
     @ns_blog.response(200, "Successfully Retrieved Blog")
     @ns_blog.response(400, "Unable to Retrieve Blog")
     def get(self, blog_id):
@@ -122,7 +126,7 @@ class Blog(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Retrieve Blog")
         
-
+    @check_apikey
     @ns_blog.expect(update_blog_model, validate=True)
     @ns_blog.response(200, "Successfully Updated Blog")
     @ns_blog.response(400, "Unable to Update Blog")
@@ -152,6 +156,7 @@ class Blog(Resource):
             return error_response(400, "Unable to Update Blog")
 
 
+    @check_apikey
     @ns_blog.response(200, "Successfully Deleted Blog")
     @ns_blog.response(400, "Unable to Delete Blog")
     def delete(self, blog_id):

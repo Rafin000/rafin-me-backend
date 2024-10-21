@@ -1,11 +1,13 @@
 from flask import request, current_app as app
 from flask_restx import Resource
+from project.server.docorators import check_apikey
 from project.server.models.models import Education
 from project.server.api.Education import ns_education
 from project.server import db
 from project.server.utils import error_response
 
 class EducationList(Resource):
+    @check_apikey
     def post(self):
         try:
             data = request.get_json()
@@ -23,6 +25,7 @@ class EducationList(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Create Education")
 
+    @check_apikey
     def get(self):
         try:
             education_list = Education.query.all()
@@ -43,6 +46,7 @@ class EducationList(Resource):
 
 
 class EducationItem(Resource):
+    @check_apikey
     def get(self, education_id):
         try:
             education = Education.query.filter_by(id=education_id).first()
@@ -62,6 +66,7 @@ class EducationItem(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Retrieve Education")
 
+    @check_apikey
     def put(self, education_id):
         try:
             data = request.get_json()
@@ -81,6 +86,7 @@ class EducationItem(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Update Education")
 
+    @check_apikey
     def delete(self, education_id):
         try:
             education = Education.query.filter_by(id=education_id).first()

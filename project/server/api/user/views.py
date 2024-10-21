@@ -1,5 +1,6 @@
 from flask import request, current_app as app
 from flask_restx import Resource
+from project.server.docorators import check_apikey
 from project.server.models.models import Users
 from project.server.api.user.schema import *
 from project.server.api.user import ns_user
@@ -7,6 +8,7 @@ from project.server import db
 from project.server.utils import error_response
 
 class UserList(Resource):
+    @check_apikey
     @ns_user.expect(create_user_model, validate=True)
     @ns_user.response(201, "Successfully Created User")
     @ns_user.response(400, "Unable to Create User")
@@ -29,6 +31,7 @@ class UserList(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Create User")
 
+    @check_apikey
     @ns_user.response(200, "Successfully Retrieved Users")
     @ns_user.response(400, "Unable to Retrieve Users")
     def get(self):
@@ -52,6 +55,7 @@ class UserList(Resource):
             return error_response(400, "Unable to Retrieve Users")
 
 class User(Resource):
+    @check_apikey
     @ns_user.response(200, "Successfully Retrieved User")
     @ns_user.response(400, "Unable to Retrieve User")
     def get(self, user_id):
@@ -119,6 +123,7 @@ class User(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Retrieve User")
 
+    @check_apikey
     @ns_user.expect(update_user_model, validate=True)
     @ns_user.response(200, "Successfully Updated User")
     @ns_user.response(400, "Unable to Update User")
@@ -144,6 +149,7 @@ class User(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Update User")
 
+    @check_apikey
     @ns_user.response(200, "Successfully Deleted User")
     @ns_user.response(400, "Unable to Delete User")
     def delete(self, user_id):

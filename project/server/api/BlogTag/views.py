@@ -2,12 +2,14 @@ from flask_restx import Namespace, Resource
 from flask import request
 from flask import current_app as app
 from project.server import db
+from project.server.docorators import check_apikey
 from project.server.models.models import Blogs
 from project.server.utils import error_response
 
 ns_blog_tags = Namespace('blog-tags', description='Blog Tag Operations')
 
 class BlogTag(Resource):
+    @check_apikey
     @ns_blog_tags.response(200, "Successfully Retrieved Tags")
     @ns_blog_tags.response(400, "Unable to Retrieve Tags")
     def get(self, blog_id):
@@ -23,6 +25,7 @@ class BlogTag(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Retrieve Tags")
 
+    @check_apikey
     @ns_blog_tags.response(200, "Successfully Added Tag")
     @ns_blog_tags.response(400, "Unable to Add Tag")
     def post(self, blog_id):
@@ -48,6 +51,7 @@ class BlogTag(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Add Tag")
 
+    @check_apikey
     @ns_blog_tags.response(200, "Successfully Deleted Tag")
     @ns_blog_tags.response(400, "Unable to Delete Tag")
     def delete(self, blog_id):

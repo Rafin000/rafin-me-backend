@@ -22,7 +22,7 @@ def create_app():
         )
 
         app.config.from_object(app_settings)
-        cors.init_app(app)
+        cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
         db.init_app(app)
         migrate.init_app(app, db)
         bcrypt.init_app(app)

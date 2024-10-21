@@ -1,11 +1,13 @@
 from flask import request, current_app as app
 from flask_restx import Resource
+from project.server.docorators import check_apikey
 from project.server.models.models import Experience
 from project.server.api.Experience import ns_experience
 from project.server import db
 from project.server.utils import error_response
 
 class ExperienceList(Resource):
+    @check_apikey
     def post(self):
         try:
             data = request.get_json()
@@ -23,6 +25,7 @@ class ExperienceList(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Create Experience")
 
+    @check_apikey
     def get(self):
         try:
             experience_list = Experience.query.all()
@@ -43,6 +46,7 @@ class ExperienceList(Resource):
 
 
 class ExperienceItem(Resource):
+    @check_apikey
     def get(self, experience_id):
         try:
             experience = Experience.query.filter_by(id=experience_id).first()
@@ -62,6 +66,7 @@ class ExperienceItem(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Retrieve Experience")
 
+    @check_apikey
     def put(self, experience_id):
         try:
             data = request.get_json()
@@ -81,6 +86,7 @@ class ExperienceItem(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Update Experience")
 
+    @check_apikey
     def delete(self, experience_id):
         try:
             experience = Experience.query.filter_by(id=experience_id).first()

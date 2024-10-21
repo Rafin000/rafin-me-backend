@@ -1,5 +1,6 @@
 from flask import request, current_app as app
 from flask_restx import Resource
+from project.server.docorators import check_apikey
 from project.server.models.models import SocialMediaLinks
 from project.server.api.social.schema import *
 from project.server.api.social import ns_social
@@ -8,6 +9,7 @@ from project.server.utils import error_response
 
 
 class SocialMediaLinksList(Resource):
+    @check_apikey
     @ns_social.expect(create_social_media_links_model, validate=True)
     @ns_social.response(201, "Successfully Created Social Media Link")
     @ns_social.response(400, "Unable to Create Social Media Link")
@@ -28,6 +30,7 @@ class SocialMediaLinksList(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Create Social Media Link")
 
+    @check_apikey
     @ns_social.response(200, "Successfully Retrieved Social Media Links")
     @ns_social.response(400, "Unable to Retrieve Social Media Links")
     def get(self):
@@ -49,6 +52,7 @@ class SocialMediaLinksList(Resource):
             return error_response(400, "Unable to Retrieve Social Media Links")
 
 class SocialMediaLink(Resource):
+    @check_apikey
     @ns_social.response(200, "Successfully Retrieved Social Media Link")
     @ns_social.response(400, "Unable to Retrieve Social Media Link")
     def get(self, link_id):
@@ -70,6 +74,7 @@ class SocialMediaLink(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Retrieve Social Media Link")
 
+    @check_apikey
     @ns_social.expect(update_social_media_links_model, validate=True)
     @ns_social.response(200, "Successfully Updated Social Media Link")
     @ns_social.response(400, "Unable to Update Social Media Link")
@@ -92,6 +97,7 @@ class SocialMediaLink(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Update Social Media Link")
 
+    @check_apikey
     @ns_social.response(200, "Successfully Deleted Social Media Link")
     @ns_social.response(400, "Unable to Delete Social Media Link")
     def delete(self, link_id):

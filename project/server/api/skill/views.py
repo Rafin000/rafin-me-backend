@@ -1,11 +1,13 @@
 from flask import request, current_app as app
 from flask_restx import Resource
+from project.server.docorators import check_apikey
 from project.server.models.models import Users, UserSkills
 from project.server import db
 from project.server.api.skill import ns_user_skill
 from project.server.utils import error_response
 
 class UserSkillsListResource(Resource):
+    @check_apikey
     @ns_user_skill.response(200, "Successfully Added Skill")
     @ns_user_skill.response(400, "Unable to Add Skill")
     def post(self):
@@ -32,6 +34,7 @@ class UserSkillsListResource(Resource):
             app.logger.error(f"Error adding skill for user_id {user_id}: {e}")
             return error_response(400, 'Unable to Add Skill')
 
+    @check_apikey
     @ns_user_skill.response(200, "Successfully Retrieved Skills")
     @ns_user_skill.response(400, "Unable to Retrieve Skills")
     def get(self):
@@ -60,6 +63,7 @@ class UserSkillsListResource(Resource):
             return error_response(400, "Unable to Retrieve Skills")
 
 class UserSkillsResource(Resource):
+    @check_apikey
     @ns_user_skill.response(200, "Successfully Deleted Skill")
     @ns_user_skill.response(400, "Unable to Delete Skill")
     def delete(self, skill_id):
@@ -83,6 +87,7 @@ class UserSkillsResource(Resource):
             app.logger.error(f"Error deleting skill for user_id {user_id}: {e}")
             return error_response(400, "Unable to Delete Skill")
 
+    @check_apikey
     @ns_user_skill.response(200, "Successfully Updated Skill")
     @ns_user_skill.response(400, "Unable to Update Skill")
     def put(self, skill_id):

@@ -1,5 +1,6 @@
 from flask import request, current_app as app
 from flask_restx import Resource
+from project.server.docorators import check_apikey
 from project.server.models.models import Testimonials
 from project.server.api.testimonial.schema import *
 from project.server.api.testimonial import ns_testimonial
@@ -7,6 +8,7 @@ from project.server import db
 from project.server.utils import error_response
 
 class TestimonialList(Resource):
+    @check_apikey
     @ns_testimonial.expect(create_testimonial_model, validate=True)
     @ns_testimonial.response(201, "Successfully Created Testimonial")
     @ns_testimonial.response(400, "Unable to Create Testimonial")
@@ -28,6 +30,7 @@ class TestimonialList(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Create Testimonial")
 
+    @check_apikey
     @ns_testimonial.response(200, "Successfully Retrieved Testimonials")
     @ns_testimonial.response(400, "Unable to Retrieve Testimonials")
     def get(self):
@@ -50,6 +53,7 @@ class TestimonialList(Resource):
             return error_response(400, "Unable to Retrieve Testimonials")
 
 class Testimonial(Resource):
+    @check_apikey
     @ns_testimonial.response(200, "Successfully Retrieved Testimonial")
     @ns_testimonial.response(400, "Unable to Retrieve Testimonial")
     def get(self, testimonial_id):
@@ -72,6 +76,7 @@ class Testimonial(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Retrieve Testimonial")
 
+    @check_apikey
     @ns_testimonial.expect(update_testimonial_model, validate=True)
     @ns_testimonial.response(200, "Successfully Updated Testimonial")
     @ns_testimonial.response(400, "Unable to Update Testimonial")
@@ -96,6 +101,7 @@ class Testimonial(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Update Testimonial")
 
+    @check_apikey
     @ns_testimonial.response(200, "Successfully Deleted Testimonial")
     @ns_testimonial.response(400, "Unable to Delete Testimonial")
     def delete(self, testimonial_id):
