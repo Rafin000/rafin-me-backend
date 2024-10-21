@@ -111,12 +111,13 @@ class Testimonials(db.Model):
 
     user = db.relationship('Users', backref=db.backref('testimonials_list', lazy=True))
 
-    def __init__(self, user_id, name, company, content, designation=None, date=None):
+    def __init__(self, user_id, name, company, content, image_link, designation=None, date=None):
         self.user_id = user_id
         self.name = name
         self.content = content
         self.designation = designation
         self.company = company
+        self.image_link = image_link
         if date:
             self.date = date
 
