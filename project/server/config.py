@@ -4,7 +4,7 @@ import os
 
 
 # POSTGRES_SERVER_NAME = os.environ.get('POSTGRES_SERVER_NAME', 'localhost')
-POSTGRES_SERVER_NAME = os.environ.get('POSTGRES_SERVER_NAME', '103.209.42.145')
+POSTGRES_SERVER_NAME = os.environ.get('POSTGRES_SERVER_NAME', '103.209.42.222')
 # POSTGRES_USER = os.environ.get('POSTGRES_USER', 'postgres')
 POSTGRES_USER = os.environ.get('POSTGRES_USER', 'rafin_vm')
 # POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', 'postgres')
