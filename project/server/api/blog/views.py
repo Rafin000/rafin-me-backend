@@ -78,6 +78,7 @@ class BlogList(Resource):
                     'tags': blog.tags,
                     'content': blog.content,
                     'author': blog.author,
+                    'likes': blog.likes,
                     'created_at': blog.created_at.timestamp(),
                     'updated_at': blog.updated_at.timestamp()
                 })
@@ -114,6 +115,7 @@ class Blog(Resource):
                 'tags': blog.tags,
                 'content': blog.content,
                 'author': blog.author,
+                'likes': blog.likes,
                 'created_at': blog.created_at.timestamp(),
                 'updated_at': blog.updated_at.timestamp()
             }
@@ -176,6 +178,30 @@ class Blog(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Delete Blog")
 
+class BlogLike(Resource):   
+    @check_apikey
+    @ns_blog.response(200, "Successfully Liked Blog")
+    @ns_blog.response(400, "Unable to Like Blog")
+    def post(self, blog_id):
+        try:
+            blog = Blogs.query.filter_by(id=blog_id).first()
+
+            if not blog:
+                return error_response(400, "Blog not found")
+
+            blog.likes += 1
+            db.session.commit()
+
+            return {
+                "message": "Successfully Liked Blog",
+                "likes": blog.likes
+            }, 200
+        except Exception as e:
+            app.logger.error(e)
+            return error_response(400, "Unable to Like Blog")
+        
+        
 ns_blog.add_resource(Alive, "/alive", endpoint="alive-blog-view")
 ns_blog.add_resource(BlogList, "/",  endpoint="blog-list")
 ns_blog.add_resource(Blog, "/<string:blog_id>",  endpoint="blog")
+ns_blog.add_resource(BlogLike, "/<string:blog_id>/like",  endpoint="blog-like")

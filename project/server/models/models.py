@@ -16,6 +16,7 @@ class Blogs(db.Model):
     reading_time = Column(String(50))
     thumbnail_url = Column(String(255))
     tags = Column(ARRAY(String))  
+    likes = Column(db.Integer, default=0, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
@@ -27,6 +28,7 @@ class Blogs(db.Model):
         self.reading_time = reading_time
         self.thumbnail_url = thumbnail_url
         self.tags = tags if tags else []
+        self.likes = 0
 
 class Users(db.Model):
     __tablename__ = 'users'
