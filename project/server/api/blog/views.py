@@ -58,7 +58,7 @@ class BlogList(Resource):
             return error_response(400, "Unable to Create Blog")
         
 
-    @check_apikey
+    # @check_apikey
     @ns_blog.response(200, "Successfully Retrieved Blogs")
     @ns_blog.response(400, "Unable to retrieve blogs")
     def get(self):
@@ -96,7 +96,7 @@ class BlogList(Resource):
 
 
 class Blog(Resource):   
-    @check_apikey             
+    # @check_apikey             
     @ns_blog.response(200, "Successfully Retrieved Blog")
     @ns_blog.response(400, "Unable to Retrieve Blog")
     def get(self, blog_id):

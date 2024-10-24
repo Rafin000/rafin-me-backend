@@ -34,7 +34,7 @@ class UserSkillsListResource(Resource):
             app.logger.error(f"Error adding skill for user_id {user_id}: {e}")
             return error_response(400, 'Unable to Add Skill')
 
-    @check_apikey
+    # @check_apikey
     @ns_user_skill.response(200, "Successfully Retrieved Skills")
     @ns_user_skill.response(400, "Unable to Retrieve Skills")
     def get(self):

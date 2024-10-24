@@ -25,7 +25,7 @@ class EducationList(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Create Education")
 
-    @check_apikey
+    # @check_apikey
     def get(self):
         try:
             education_list = Education.query.all()
@@ -46,7 +46,7 @@ class EducationList(Resource):
 
 
 class EducationItem(Resource):
-    @check_apikey
+    # @check_apikey
     def get(self, education_id):
         try:
             education = Education.query.filter_by(id=education_id).first()

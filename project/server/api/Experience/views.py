@@ -25,7 +25,7 @@ class ExperienceList(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Create Experience")
 
-    @check_apikey
+    # @check_apikey
     def get(self):
         try:
             experience_list = Experience.query.all()
@@ -46,7 +46,7 @@ class ExperienceList(Resource):
 
 
 class ExperienceItem(Resource):
-    @check_apikey
+    # @check_apikey
     def get(self, experience_id):
         try:
             experience = Experience.query.filter_by(id=experience_id).first()

@@ -30,7 +30,7 @@ class TestimonialList(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Create Testimonial")
 
-    @check_apikey
+    # @check_apikey
     @ns_testimonial.response(200, "Successfully Retrieved Testimonials")
     @ns_testimonial.response(400, "Unable to Retrieve Testimonials")
     def get(self):
@@ -53,7 +53,7 @@ class TestimonialList(Resource):
             return error_response(400, "Unable to Retrieve Testimonials")
 
 class Testimonial(Resource):
-    @check_apikey
+    # @check_apikey
     @ns_testimonial.response(200, "Successfully Retrieved Testimonial")
     @ns_testimonial.response(400, "Unable to Retrieve Testimonial")
     def get(self, testimonial_id):

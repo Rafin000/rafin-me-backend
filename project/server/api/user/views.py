@@ -31,7 +31,7 @@ class UserList(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Create User")
 
-    @check_apikey
+    # @check_apikey
     @ns_user.response(200, "Successfully Retrieved Users")
     @ns_user.response(400, "Unable to Retrieve Users")
     def get(self):
@@ -55,7 +55,7 @@ class UserList(Resource):
             return error_response(400, "Unable to Retrieve Users")
 
 class User(Resource):
-    @check_apikey
+    # @check_apikey
     @ns_user.response(200, "Successfully Retrieved User")
     @ns_user.response(400, "Unable to Retrieve User")
     def get(self, user_id):

@@ -9,7 +9,7 @@ from project.server.utils import error_response
 ns_blog_tags = Namespace('blog-tags', description='Blog Tag Operations')
 
 class BlogTag(Resource):
-    @check_apikey
+    # @check_apikey
     @ns_blog_tags.response(200, "Successfully Retrieved Tags")
     @ns_blog_tags.response(400, "Unable to Retrieve Tags")
     def get(self, blog_id):

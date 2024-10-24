@@ -9,7 +9,7 @@ from flask_mail import Message
 from project.server import mail
 
 class MailResource(Resource):
-    @check_apikey
+    # @check_apikey
     @ns_mail.expect(mail_model, validate=True)
     @ns_mail.response(200, 'Mail sent successfully')
     @ns_mail.response(400, 'Unable to Send Mail')

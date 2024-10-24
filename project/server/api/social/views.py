@@ -30,7 +30,7 @@ class SocialMediaLinksList(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Create Social Media Link")
 
-    @check_apikey
+    # @check_apikey
     @ns_social.response(200, "Successfully Retrieved Social Media Links")
     @ns_social.response(400, "Unable to Retrieve Social Media Links")
     def get(self):
@@ -52,7 +52,7 @@ class SocialMediaLinksList(Resource):
             return error_response(400, "Unable to Retrieve Social Media Links")
 
 class SocialMediaLink(Resource):
-    @check_apikey
+    # @check_apikey
     @ns_social.response(200, "Successfully Retrieved Social Media Link")
     @ns_social.response(400, "Unable to Retrieve Social Media Link")
     def get(self, link_id):
