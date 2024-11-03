@@ -1,14 +1,23 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress
+  name: ingress-service
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: 'true'
 spec:
   rules:
     - host: rafin.dev
       http:
         paths:
+          - path: /api/v1
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 6000
+
           - path: /
             pathType: Prefix
             backend:

@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: frontend-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: frontend-depl
   template:
     metadata:
       labels:
-        app: frontend
+        app: frontend-depl
     spec:
       containers:
-        - name: frontend
-          image: rafin1998/rafin-blog-site:1.1-frontend
+        - name: frontend-depl
+          image: rafin1998/rafin-blog-site:2.7-frontend
           ports:
             - containerPort: 80
 
@@ -22,20 +22,20 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: backend-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: backend-depl
   template:
     metadata:
       labels:
-        app: backend
+        app: backend-depl
     spec:
       containers:
-        - name: backend
-          image: rafin1998/rafin-blog-site:0.3
+        - name: backend-depl
+          image: rafin1998/rafin-blog-site:0.6
           ports:
             - containerPort: 6000
           env:
@@ -60,13 +60,13 @@ kind: Service
 metadata:
   name: frontend
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 80
       targetPort: 80
-      nodePort: 30001
+ #     nodePort: 30001
   selector:
-    app: frontend
+    app: frontend-depl
 
 ---
 apiVersion: v1
@@ -74,10 +74,10 @@ kind: Service
 metadata:
   name: backend
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 6000
       targetPort: 6000
-      nodePort: 30000
+#      nodePort: 30000
   selector:
-    app: backend
+    app: backend-depl
