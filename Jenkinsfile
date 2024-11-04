@@ -32,20 +32,34 @@ pipeline {
             }
         }
 
-        // ... other stages (Build Docker Image, Push Docker Image, etc.)
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    def imageTag = env.TAG ?: 'latest'
+                    sh "make image TAG=${imageTag}"
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
+                    sh "docker push ${DOCKER_IMAGE}:${TAG}"
+                }
+            }
+        }
     }
 
     post {
         always {
-            script {
-                // Error handling for cleanup actions
-                try {
-                    sh 'docker rmi rafin1998/rafin-blog-site:0.7 || true'
-                    sh 'rm requirements.txt || true'
-                } catch (Exception e) {
-                    echo 'Cleanup failed: ' + e.getMessage()
-                }
-            }
+            sh "docker rmi ${DOCKER_IMAGE}:${TAG} || true"
+        }
+        success {
+            echo 'Build and push completed successfully!'
+        }
+        failure {
+            echo 'Build or push failed.'
         }
     }
 }
