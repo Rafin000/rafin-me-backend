@@ -14,6 +14,17 @@ pipeline {
             }
         }
 
+        stage('Install Poetry') {
+            steps {
+                script {
+                    // Install Poetry
+                    sh 'curl -sSL https://install.python-poetry.org | python3 -'
+                    // Add Poetry to the PATH
+                    sh 'export PATH="$HOME/.local/bin:$PATH"'
+                }
+            }
+        }
+
         stage('Export Requirements') {
             steps {
                 script {
@@ -46,7 +57,6 @@ pipeline {
     post {
         always {
             sh "docker rmi ${DOCKER_IMAGE}:${TAG} || true"
-            // Remove requirements.txt after the build
             sh "rm requirements.txt || true"
         }
         success {
