@@ -1,8 +1,18 @@
 pipeline {
     agent any
 
+    // environment {
+    //     DOCKER_IMAGE = 'rafin1998/rafin-blog-site:1.1'
+    // }
+
+    // parameters {
+    //     string(name: 'DOCKER_USERNAME', defaultValue: 'rafin1998', description: 'Docker Hub Username')
+    //     string(name: 'REPO_NAME', defaultValue: 'rafin-blog-site', description: 'Repository Name')
+    //     string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Image Tag')
+    // }
+
     environment {
-        DOCKER_IMAGE = 'rafin1998/rafin-blog-site:1.1'
+        DOCKER_IMAGE = "${params.DOCKER_USERNAME}/${params.REPO_NAME}:${params.IMAGE_TAG}"
     }
 
     stages {
@@ -43,7 +53,6 @@ pipeline {
     post {
         always {
             echo 'Cleaning up...'
-            // Add cleanup steps if necessary
         }
         success {
             echo 'Pipeline succeeded!'
