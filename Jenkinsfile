@@ -2,15 +2,22 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub') 
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub')
         DOCKER_IMAGE = 'rafin1998/rafin-blog-site'
-        TAG = '0.7' 
+        TAG = '0.7' // Update the tag as needed
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Rafin000/rafin-me-frontend.git'
+                git branch: 'main', url: 'https://github.com/Rafin000/rafin-me-backend.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                // Install make if it's not available
+                sh 'which make || sudo apt update && sudo apt install -y make'
             }
         }
 
@@ -18,7 +25,6 @@ pipeline {
             steps {
                 script {
                     def imageTag = env.TAG ?: 'latest'
-                    
                     sh "make image TAG=${imageTag}"
                 }
             }
