@@ -1,10 +1,10 @@
 pipeline {
-    agent any // Run on Jenkins host, where docker is installed
+    agent any
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub')
         DOCKER_IMAGE = 'rafin1998/rafin-blog-site'
-        TAG = '0.7'
+        TAG = '0.7' // Update the tag as needed
     }
 
     stages {
@@ -16,7 +16,16 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'make' // Run make without needing sudo
+                // Install make if it's not available
+                sh '''
+                    if ! command -v make &> /dev/null; then
+                        echo "Installing make..."
+                        sudo apt-get update
+                        sudo apt-get install -y make
+                    else
+                        echo "make is already installed."
+                    fi
+                '''
             }
         }
 
@@ -24,7 +33,7 @@ pipeline {
             steps {
                 script {
                     def imageTag = env.TAG ?: 'latest'
-                    sh "docker build -t ${DOCKER_IMAGE}:${imageTag} ."
+                    sh "make image TAG=${imageTag}"
                 }
             }
         }
