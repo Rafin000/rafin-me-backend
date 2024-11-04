@@ -35,6 +35,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    // Assigning the image tag from the environment variable or defaulting to '1.0'
                     def imageTag = env.TAG ?: '1.0'
                     // Build the Docker image directly
                     sh "docker build -f Dockerfile -t ${DOCKER_IMAGE}:${imageTag} . || true"
@@ -55,9 +56,11 @@ pipeline {
 
     post {
         always {
-            def imageTag = env.TAG ?: '1.0'
-            sh "docker rmi ${DOCKER_IMAGE}:${imageTag} || true"
-            sh "rm requirements.txt || true"
+            script {
+                def imageTag = env.TAG ?: '1.0'
+                sh "docker rmi ${DOCKER_IMAGE}:${imageTag} || true"
+                sh "rm requirements.txt || true"
+            }
         }
         success {
             echo 'Build and push completed successfully!'
