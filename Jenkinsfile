@@ -35,7 +35,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def imageTag = env.TAG ?: 'latest'
+                    def imageTag = env.TAG ?: '1.0'
                     // Build the Docker image directly
                     sh "docker build -f Dockerfile -t ${DOCKER_IMAGE}:${imageTag} . || true"
                 }
@@ -45,8 +45,9 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
+                    def imageTag = env.TAG ?: '1.0'
                     sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
-                    sh "docker push ${DOCKER_IMAGE}:${TAG}"
+                    sh "docker push ${DOCKER_IMAGE}:${imageTag}"
                 }
             }
         }
@@ -54,7 +55,8 @@ pipeline {
 
     post {
         always {
-            sh "docker rmi ${DOCKER_IMAGE}:${TAG} || true"
+            def imageTag = env.TAG ?: '1.0'
+            sh "docker rmi ${DOCKER_IMAGE}:${imageTag} || true"
             sh "rm requirements.txt || true"
         }
         success {
