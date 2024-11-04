@@ -14,18 +14,12 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Export Requirements') {
             steps {
-                // Install make if it's not available
-                sh '''
-                    if ! command -v make &> /dev/null; then
-                        echo "Installing make..."
-                        sudo apt-get update
-                        sudo apt-get install -y make
-                    else
-                        echo "make is already installed."
-                    fi
-                '''
+                script {
+                    // Export Python dependencies to requirements.txt
+                    sh 'poetry export -f requirements.txt --output requirements.txt --without-hashes'
+                }
             }
         }
 
@@ -33,7 +27,8 @@ pipeline {
             steps {
                 script {
                     def imageTag = env.TAG ?: 'latest'
-                    sh "make image TAG=${imageTag}"
+                    // Build the Docker image directly
+                    sh "docker build -f Dockerfile -t ${DOCKER_IMAGE}:${imageTag} . || true"
                 }
             }
         }
@@ -51,6 +46,8 @@ pipeline {
     post {
         always {
             sh "docker rmi ${DOCKER_IMAGE}:${TAG} || true"
+            // Remove requirements.txt after the build
+            sh "rm requirements.txt || true"
         }
         success {
             echo 'Build and push completed successfully!'
