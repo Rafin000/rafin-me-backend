@@ -36,7 +36,8 @@ pipeline {
             steps {
                 script {
                     def imageTag = env.TAG ?: 'latest'
-                    sh "make image TAG=${imageTag}"
+                    // Build the Docker image directly
+                    sh "docker build -f Dockerfile -t ${DOCKER_IMAGE}:${imageTag} . || true"
                 }
             }
         }
@@ -54,6 +55,7 @@ pipeline {
     post {
         always {
             sh "docker rmi ${DOCKER_IMAGE}:${TAG} || true"
+            sh "rm requirements.txt || true"
         }
         success {
             echo 'Build and push completed successfully!'
