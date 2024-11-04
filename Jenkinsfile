@@ -1,72 +1,48 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = 'rafin1998/rafin-blog-site:1.1'
+    }
+
     stages {
         stage('Checkout SCM') {
             steps {
                 checkout scm
             }
         }
-
         stage('Install Poetry') {
             steps {
-                script {
-                    sh '''
-                        curl -sSL https://install.python-poetry.org | python3 -
-                        export PATH="/var/lib/jenkins/.local/bin:$PATH"
-                        echo $PATH
-                        poetry --version
-                    '''
-                }
+                sh 'curl -sSL https://install.python-poetry.org | python3 -'
+                sh 'export PATH="$HOME/.local/bin:$PATH" && poetry --version'
             }
         }
-
         stage('Export Requirements') {
             steps {
-                script {
-                    sh '''
-                        export PATH="/var/lib/jenkins/.local/bin:$PATH"
-                        poetry export -f requirements.txt --output requirements.txt --without-hashes
-                    '''
-                }
+                sh 'export PATH="$HOME/.local/bin:$PATH" && poetry export -f requirements.txt --output requirements.txt --without-hashes'
             }
         }
-
         stage('Build Docker Image') {
             steps {
-                script {
-                    // Assigning the image tag from the environment variable or defaulting to '1.0'
-                    def imageTag = env.TAG ?: '1.0'
-                    // Build the Docker image directly
-                    sh "docker build -f Dockerfile -t ${DOCKER_IMAGE}:${imageTag} . || true"
-                }
+                sh "docker build -t ${DOCKER_IMAGE} ."
             }
         }
-
         stage('Push Docker Image') {
             steps {
-                script {
-                    def imageTag = env.TAG ?: '1.0'
-                    sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
-                    sh "docker push ${DOCKER_IMAGE}:${imageTag}"
-                }
+                sh "docker push ${DOCKER_IMAGE}"
             }
         }
     }
-
     post {
         always {
-            script {
-                def imageTag = env.TAG ?: '1.0'
-                sh "docker rmi ${DOCKER_IMAGE}:${imageTag} || true"
-                sh "rm requirements.txt || true"
-            }
+            echo 'Cleaning up...'
+            // Add cleanup steps if necessary
         }
         success {
-            echo 'Build and push completed successfully!'
+            echo 'Pipeline succeeded!'
         }
         failure {
-            echo 'Build or push failed.'
+            echo 'Pipeline failed.'
         }
     }
 }
