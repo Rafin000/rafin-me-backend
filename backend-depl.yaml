@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-depl
+  template:
+    metadata:
+      labels:
+        app: backend-depl
+    spec:
+      containers:
+        - name: backend-depl
+          image: rafin1998/rafin-blog-site:0.6
+          ports:
+            - containerPort: 6000
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: SECRET_KEY
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: API_KEY
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: POSTGRES_PASSWORD
+            - name: APP_SETTINGS
+              value: project.server.config.ProductionConfig
+            - name: POSTGRES_SERVER_NAME
+              value: 103.209.42.222
+            - name: POSTGRES_USER
+              value: rafin_vm
+            - name: FLASK_APP
+              value: manage.py
