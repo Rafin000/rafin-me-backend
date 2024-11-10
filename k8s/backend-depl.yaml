@@ -1,3 +1,38 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: backend-depl
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: backend-depl
+#   template:
+#     metadata:
+#       labels:
+#         app: backend-depl
+#     spec:
+#       containers:
+#         - name: backend-depl
+#           image: rafin1998/rafin-blog-site:0.6
+#           ports:
+#             - containerPort: 6000
+#           env:
+#             - name: SECRET_KEY
+#               value: "63eaQmNBpg"
+#             - name: API_KEY
+#               value: "@Beginning@After@the@ENd@"
+#             - name: APP_SETTINGS
+#               value: project.server.config.ProductionConfig
+#             - name: POSTGRES_SERVER_NAME
+#               value: 103.209.42.222
+#             - name: POSTGRES_USER
+#               value: rafin_vm
+#             - name: POSTGRES_PASSWORD
+#               value: raf1n%40%40vm
+#             - name: FLASK_APP
+#               value: manage.py
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,16 +54,34 @@ spec:
             - containerPort: 6000
           env:
             - name: SECRET_KEY
-              value: "63eaQmNBpg"
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: SECRET_KEY
             - name: API_KEY
-              value: "@Beginning@After@the@ENd@"
-            - name: APP_SETTINGS
-              value: project.server.config.ProductionConfig
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: API_KEY
             - name: POSTGRES_SERVER_NAME
-              value: 103.209.42.222
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: POSTGRES_SERVER_NAME
             - name: POSTGRES_USER
-              value: rafin_vm
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
-              value: raf1n%40%40vm
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: POSTGRES_PASSWORD
+            - name: APP_SETTINGS
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: APP_SETTINGS
             - name: FLASK_APP
               value: manage.py
