@@ -19,25 +19,16 @@ spec:
             - containerPort: 6000
           env:
             - name: SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: SECRET_KEY
+              value: "63eaQmNBpg"
             - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: API_KEY
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: POSTGRES_PASSWORD
+              value: "@Beginning@After@the@ENd@"
             - name: APP_SETTINGS
               value: project.server.config.ProductionConfig
             - name: POSTGRES_SERVER_NAME
               value: 103.209.42.222
             - name: POSTGRES_USER
               value: rafin_vm
+            - name: POSTGRES_PASSWORD
+              value: raf1n%40%40vm
             - name: FLASK_APP
               value: manage.py
