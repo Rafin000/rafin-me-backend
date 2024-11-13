@@ -2,10 +2,66 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "${params.DOCKER_USERNAME}/${params.REPO_NAME}:${params.IMAGE_TAG}"
+        // DOCKER_IMAGE = "${params.DOCKER_USERNAME}/${params.REPO_NAME}:${params.IMAGE_TAG}"
+        DOCKER_USERNAME = "rafin1998"
+        REPO_NAME = "rafin-blog-site"
     }
 
     stages {
+        stage('Checkout and Get Version') {
+            steps {
+                script {
+                    // Checkout the repository
+                    git branch: 'main', url: 'https://github.com/Rafin000/rafin-me-backend.git'
+                    
+                    writeFile file: 'get_version.sh', text: '''#!/bin/bash
+
+                                                                GIT_USER_NAME="Rafin000"
+                                                                GIT_REPO_NAME="rafin-me-backend"
+                                                                FILE_PATH="k8s/backend-depl.yaml"
+                                                                GITHUB_TOKEN=$1  
+
+                                                                # Directly get the raw content using the raw URL
+                                                                content_decoded=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+                                                                    "https://raw.githubusercontent.com/${GIT_USER_NAME}/${GIT_REPO_NAME}/main/${FILE_PATH}")
+
+                                                                current_tag=$(echo "$content_decoded" | grep -o 'image: [^ ]*' | sed 's/image: //' | grep -o '[0-9]\\+\\.[0-9]')
+
+                                                                if [[ -z "$current_tag" ]]; then
+                                                                    current_tag="0.0"
+                                                                fi
+
+                                                                if [[ $current_tag =~ ([0-9]+)\\.([0-9]+) ]]; then
+                                                                    major=${BASH_REMATCH[1]}
+                                                                    minor=${BASH_REMATCH[2]}
+                                                                else
+                                                                    major=0
+                                                                    minor=0
+                                                                fi
+
+                                                                if [ "$minor" -ge 9 ]; then
+                                                                    major=$((major + 1))
+                                                                    minor=0
+                                                                else
+                                                                    minor=$((minor + 1))
+                                                                fi
+
+                                                                new_tag="${major}.${minor}"
+                                                                echo "$new_tag"
+                                                                '''
+                    
+                    sh 'chmod +x get_version.sh'
+        
+                    withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                        env.IMAGE_TAG = sh(script: './get_version.sh ${GITHUB_TOKEN}', returnStdout: true).trim()
+                    }
+                    env.DOCKER_IMAGE = "${env.DOCKER_USERNAME}/${env.REPO_NAME}:${env.IMAGE_TAG}"
+                    
+                    echo "New version: ${env.IMAGE_TAG}"
+                    echo "Docker image: ${env.DOCKER_IMAGE}"
+                }
+            }
+        }
         stage('Checkout SCM') {
             steps {
                 checkout scm
