@@ -107,7 +107,7 @@ pipeline {
                         sed -i "s|image: ${DOCKER_USERNAME}/${REPO_NAME}:[^ ]*|image: ${DOCKER_IMAGE}|g" k8s-backend/backend-depl.yaml
                         git add k8s-backend/backend-depl.yaml
                         git commit -m "Update deployment image to ${IMAGE_TAG}"
-                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_DEPLOYMENT_REPO_NAME}.git
+                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_DEPLOYMENT_REPO_NAME}.git HEAD:main
                     '''
                 }
             }
