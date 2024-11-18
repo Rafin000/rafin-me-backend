@@ -2,75 +2,67 @@ pipeline {
     agent any
 
     environment {
-        // DOCKER_IMAGE = "${params.DOCKER_USERNAME}/${params.REPO_NAME}:${params.IMAGE_TAG}"
         DOCKER_USERNAME = "rafin1998"
         REPO_NAME = "rafin-blog-site"
+        GIT_USER_NAME = "Rafin000"
+        GIT_USER_EMAIL = "marufulislam00000@gmail.com"
+        GIT_REPO_NAME = "rafin-me-backend"
+        DEPLOYMENT_FILE = "k8s/backend-depl.yaml"
     }
 
     stages {
         stage('Checkout and Get Version') {
             steps {
                 script {
-                    // Checkout the repository
-                    git branch: 'main', url: 'https://github.com/Rafin000/rafin-me-backend.git'
+                    git branch: 'main', url: "https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git"
                     
                     writeFile file: 'get_version.sh', text: '''#!/bin/bash
+                        GIT_USER_NAME="${1}"
+                        GIT_REPO_NAME="${2}"
+                        FILE_PATH="${3}"
+                        GITHUB_TOKEN="${4}"
 
-                                                                GIT_USER_NAME="Rafin000"
-                                                                GIT_REPO_NAME="rafin-me-backend"
-                                                                FILE_PATH="k8s/backend-depl.yaml"
-                                                                GITHUB_TOKEN=$1  
+                        content_decoded=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+                            "https://raw.githubusercontent.com/${GIT_USER_NAME}/${GIT_REPO_NAME}/main/${FILE_PATH}")
 
-                                                                # Directly get the raw content using the raw URL
-                                                                content_decoded=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
-                                                                    "https://raw.githubusercontent.com/${GIT_USER_NAME}/${GIT_REPO_NAME}/main/${FILE_PATH}")
+                        current_tag=$(echo "$content_decoded" | grep -o 'image: [^ ]*' | sed 's/image: //' | grep -o '[0-9]\\+\\.[0-9]')
 
-                                                                current_tag=$(echo "$content_decoded" | grep -o 'image: [^ ]*' | sed 's/image: //' | grep -o '[0-9]\\+\\.[0-9]')
+                        major=0; minor=0
+                        if [[ $current_tag =~ ([0-9]+)\\.([0-9]+) ]]; then
+                            major=${BASH_REMATCH[1]}
+                            minor=${BASH_REMATCH[2]}
+                        fi
+                        if [ "$minor" -ge 9 ]; then
+                            major=$((major + 1))
+                            minor=0
+                        else
+                            minor=$((minor + 1))
+                        fi
 
-                                                                if [[ -z "$current_tag" ]]; then
-                                                                    current_tag="0.0"
-                                                                fi
-
-                                                                if [[ $current_tag =~ ([0-9]+)\\.([0-9]+) ]]; then
-                                                                    major=${BASH_REMATCH[1]}
-                                                                    minor=${BASH_REMATCH[2]}
-                                                                else
-                                                                    major=0
-                                                                    minor=0
-                                                                fi
-
-                                                                if [ "$minor" -ge 9 ]; then
-                                                                    major=$((major + 1))
-                                                                    minor=0
-                                                                else
-                                                                    minor=$((minor + 1))
-                                                                fi
-
-                                                                new_tag="${major}.${minor}"
-                                                                echo "$new_tag"
-                                                                '''
+                        new_tag="${major}.${minor}"
+                        echo "$new_tag"
+                    '''
                     
                     sh 'chmod +x get_version.sh'
-        
+
                     withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-                        env.IMAGE_TAG = sh(script: './get_version.sh ${GITHUB_TOKEN}', returnStdout: true).trim()
+                        env.IMAGE_TAG = sh(
+                            script: "./get_version.sh ${GIT_USER_NAME} ${GIT_REPO_NAME} ${DEPLOYMENT_FILE} ${GITHUB_TOKEN}",
+                            returnStdout: true
+                        ).trim()
                     }
-                    env.DOCKER_IMAGE = "${env.DOCKER_USERNAME}/${env.REPO_NAME}:${env.IMAGE_TAG}"
-                    
-                    echo "New version: ${env.IMAGE_TAG}"
-                    echo "Docker image: ${env.DOCKER_IMAGE}"
+                    env.DOCKER_IMAGE = "${DOCKER_USERNAME}/${REPO_NAME}:${env.IMAGE_TAG}"
                 }
             }
         }
-        stage('Checkout SCM') {
+        stage('Setup SCM and Environment') {
             steps {
                 checkout scm
-            }
-        }
-        stage('Install Poetry') {
-            steps {
-                sh 'curl -sSL https://install.python-poetry.org | python3 -'
-                sh 'export PATH="$HOME/.local/bin:$PATH" && poetry --version'
+                sh '''
+                    curl -sSL https://install.python-poetry.org | python3 -
+                    export PATH="$HOME/.local/bin:$PATH"
+                '''
+                sh 'poetry --version'
             }
         }
         stage('Export Requirements') {
@@ -78,64 +70,29 @@ pipeline {
                 sh 'export PATH="$HOME/.local/bin:$PATH" && poetry export -f requirements.txt --output requirements.txt --without-hashes'
             }
         }
-        stage('Build Docker Image') {
+        stage('Build and Push Docker Image') {
             steps {
                 sh "docker build -t ${DOCKER_IMAGE} ."
-            }
-        }
-        stage('Login to Docker Hub') {
-            steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+                    sh "docker push ${DOCKER_IMAGE}"
                 }
             }
         }
-        stage('Push Docker Image') {
-            steps {
-                sh "docker push ${DOCKER_IMAGE}"
-            }
-        }
         stage('Update Deployment File') {
-            environment {
-                GIT_REPO_NAME = "rafin-me-backend"
-                GIT_USER_NAME = "Rafin000"
-                GIT_USER_EMAIL = "marufulislam00000@gmail.com"
-                // BUILD_NUMBER = "${params.IMAGE_TAG}"
-            }
             steps {
                 withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                     sh '''
                         set -e
-
-                        # Check if directory exists and remove it if necessary
-                        if [ -d "${GIT_REPO_NAME}" ]; then
-                        rm -rf ${GIT_REPO_NAME}
-                        fi
-
-                        # Clone the repository
+                        rm -rf ${GIT_REPO_NAME} || true
                         git clone https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git
-
-                        # Navigate to the repository directory
                         cd ${GIT_REPO_NAME}
-
-                        # Configure git user
                         git config user.email "${GIT_USER_EMAIL}"
                         git config user.name "${GIT_USER_NAME}"
-
-                        echo  ${IMAGE_TAG}
-
-                        # Optional: Ensure latest changes
                         git pull origin main
-
-                        # Update the deployment file
-                        sed -i "s|image: rafin1998/rafin-blog-site:[^ ]*|image: rafin1998/rafin-blog-site:${IMAGE_TAG}|g" k8s/backend-depl.yaml
-
-
-                        # Add and commit changes
-                        git add k8s/backend-depl.yaml
+                        sed -i "s|image: ${DOCKER_USERNAME}/${REPO_NAME}:[^ ]*|image: ${DOCKER_USERNAME}/${REPO_NAME}:${IMAGE_TAG}|g" ${DEPLOYMENT_FILE}
+                        git add ${DEPLOYMENT_FILE}
                         git commit -m "Update deployment image to version ${IMAGE_TAG} [Jenkins build ${IMAGE_TAG}]"
-
-                        # Push changes back to the repository
                         git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
                     '''
                 }
@@ -144,10 +101,10 @@ pipeline {
     }
     post {
         always {
-            echo 'Cleaning up...'
+            echo 'Cleaning up workspace...'
         }
         success {
-            echo 'Pipeline succeeded!'
+            echo "Pipeline succeeded! New Docker image: ${DOCKER_IMAGE}"
         }
         failure {
             echo 'Pipeline failed.'
