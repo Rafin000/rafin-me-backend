@@ -94,8 +94,8 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                     sh '''
-                        if [ -d "${GIT_REPO_NAME}" ]; then
-                            rm -rf ${GIT_REPO_NAME}
+                        if [ -d "${GIT_DEPLOYMENT_REPO_NAME}" ]; then
+                            rm -rf ${GIT_DEPLOYMENT_REPO_NAME}
                         fi
 
                         git clone https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_DEPLOYMENT_REPO_NAME}.git
