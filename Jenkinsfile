@@ -6,6 +6,7 @@ pipeline {
         REPO_NAME = "rafin-blog-site"
         GIT_USER_NAME = "Rafin000"
         GIT_REPO_NAME = "rafin-me-backend"
+        GIT_DEPLOYMENT_REPO_NAME = "rafin-blog-site-deployment"
         GIT_USER_EMAIL = "marufulislam00000@gmail.com"
     }
 
@@ -17,8 +18,8 @@ pipeline {
 
                     writeFile file: 'get_version.sh', text: '''#!/bin/bash
                         GITHUB_TOKEN=$1  
-                        FILE_PATH="k8s/backend-depl.yaml"
-                        REPO_URL="https://raw.githubusercontent.com/${GIT_USER_NAME}/${GIT_REPO_NAME}/main/${FILE_PATH}"
+                        FILE_PATH="k8s-backend/backend-depl.yaml"
+                        REPO_URL="https://raw.githubusercontent.com/${GIT_USER_NAME}/${GIT_DEPLOYMENT_REPO_NAME}/main/${FILE_PATH}"
 
                         content=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" ${REPO_URL})
                         current_tag=$(echo "$content" | grep -o 'image: [^ ]*' | grep -o '[0-9]\\+\\.[0-9]')
@@ -97,16 +98,16 @@ pipeline {
                             rm -rf ${GIT_REPO_NAME}
                         fi
 
-                        git clone https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git
-                        cd ${GIT_REPO_NAME}
+                        git clone https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_DEPLOYMENT_REPO_NAME}.git
+                        cd ${GIT_DEPLOYMENT_REPO_NAME}
                         
                         git config user.name "${GIT_USER_NAME}"
                         git config user.email "${GIT_USER_EMAIL}"
 
-                        sed -i "s|image: ${DOCKER_USERNAME}/${REPO_NAME}:[^ ]*|image: ${DOCKER_IMAGE}|g" k8s/backend-depl.yaml
-                        git add k8s/backend-depl.yaml
+                        sed -i "s|image: ${DOCKER_USERNAME}/${REPO_NAME}:[^ ]*|image: ${DOCKER_IMAGE}|g" k8s-backend/backend-depl.yaml
+                        git add k8s-backend/backend-depl.yaml
                         git commit -m "Update deployment image to ${IMAGE_TAG}"
-                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git
+                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_DEPLOYMENT_REPO_NAME}.git
                     '''
                 }
             }
