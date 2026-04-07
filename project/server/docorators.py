@@ -9,7 +9,7 @@ def check_apikey(f):
         app.logger.info(f"auth_token: {auth_token}")
         app.logger.info(f"api key: {api_key}")
         if not auth_token and not api_key:
-            abort(404, "No token or api key found!!!")
+            abort(401, "No token or api key found")
         # elif auth_token:
         #     payload = User.decode_auth_token(auth_token)
         #     if payload == 'Signature expired. Please log in again.':
