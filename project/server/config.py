@@ -21,6 +21,14 @@ class BaseConfig:
     # Base URL prepended to asset keys stored in the DB
     # (e.g. "https://nexora-uploads.s3.us-east-1.amazonaws.com/")
     S3_BASE_URL = os.environ.get('S3_BASE_URL', '')
+    # AWS credentials + bucket config for the upload endpoint.
+    # If any of these are missing, /api/v1/uploads returns 503.
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
+    S3_BUCKET = os.environ.get('S3_BUCKET', '')
+    S3_UPLOAD_PREFIX = os.environ.get('S3_UPLOAD_PREFIX', 'rafin-assets')
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10 MB upload cap
     DEBUG = False
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
