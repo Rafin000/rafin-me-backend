@@ -18,6 +18,9 @@ class BaseConfig:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
+    # Base URL prepended to asset keys stored in the DB
+    # (e.g. "https://nexora-uploads.s3.us-east-1.amazonaws.com/")
+    S3_BASE_URL = os.environ.get('S3_BASE_URL', '')
     DEBUG = False
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')

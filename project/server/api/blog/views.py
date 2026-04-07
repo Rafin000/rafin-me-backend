@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required
 from project.server.models.models import Blogs
 from project.server.api.blog.schema import *
 from project.server import db
-from project.server.utils import error_response
+from project.server.utils import error_response, asset_url
 
 
 class Alive(Resource):
@@ -74,7 +74,7 @@ class BlogList(Resource):
                     'title': blog.title,
                     'summary': blog.summary,
                     'reading_time': blog.reading_time,
-                    'thumbnail_url': blog.thumbnail_url,
+                    'thumbnail_url': asset_url(blog.thumbnail_url),
                     'tags': blog.tags,
                     'content': blog.content,
                     'author': blog.author,
@@ -111,7 +111,7 @@ class Blog(Resource):
                 'title': blog.title,
                 'summary': blog.summary,
                 'reading_time': blog.reading_time,
-                'thumbnail_url': blog.thumbnail_url,
+                'thumbnail_url': asset_url(blog.thumbnail_url),
                 'tags': blog.tags,
                 'content': blog.content,
                 'author': blog.author,

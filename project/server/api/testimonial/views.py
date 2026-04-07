@@ -5,7 +5,7 @@ from project.server.models.models import Testimonials
 from project.server.api.testimonial.schema import *
 from project.server.api.testimonial import ns_testimonial
 from project.server import db
-from project.server.utils import error_response
+from project.server.utils import error_response, asset_url
 
 class TestimonialList(Resource):
     @jwt_required()
@@ -44,7 +44,7 @@ class TestimonialList(Resource):
                     'content': testimonial.content,
                     'designation': testimonial.designation,
                     'company': testimonial.company,
-                    'image_link': testimonial.image_link
+                    'image_link': asset_url(testimonial.image_link)
                 } for testimonial in testimonials
             ]
             return {"message": "Successfully Retrieved Testimonials", "data": serialized_testimonials}, 200
@@ -69,7 +69,7 @@ class Testimonial(Resource):
                 'content': testimonial.content,
                 'designation': testimonial.designation,
                 'company': testimonial.company,
-                'image_link': testimonial.image_link
+                'image_link': asset_url(testimonial.image_link)
             }
             return {"message": "Successfully Retrieved Testimonial", "data": serialized_testimonial}, 200
         except Exception as e:

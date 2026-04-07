@@ -1,3 +1,27 @@
+from flask import current_app
+
+
+def asset_url(key):
+    """
+    Turn a stored asset key into a full public URL by prepending S3_BASE_URL.
+
+    - None / empty input returns None.
+    - Values that already look like full URLs (http:// or https://) are
+      returned unchanged — this keeps backward compat with any legacy rows
+      and lets the admin still paste a full URL when needed.
+    - Otherwise: returns S3_BASE_URL + key. If S3_BASE_URL is not configured,
+      the value is returned as-is.
+    """
+    if not key:
+        return key
+    if key.startswith("http://") or key.startswith("https://"):
+        return key
+    base = current_app.config.get("S3_BASE_URL", "")
+    if not base:
+        return key
+    return base.rstrip("/") + "/" + key.lstrip("/")
+
+
 def error_response(status_code, message=None, data=None):
     """
     Generates a standardized error response for API endpoints.

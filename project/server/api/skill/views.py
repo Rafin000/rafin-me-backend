@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required
 from project.server.models.models import Users, UserSkills
 from project.server import db
 from project.server.api.skill import ns_user_skill
-from project.server.utils import error_response
+from project.server.utils import error_response, asset_url
 
 class UserSkillsListResource(Resource):
     @jwt_required()
@@ -50,7 +50,7 @@ class UserSkillsListResource(Resource):
                 {
                     'id': str(skill.id),
                     'skill': skill.skill,
-                    'icon_link': skill.icon_link,
+                    'icon_link': asset_url(skill.icon_link),
                     'user_id': str(skill.user_id)
                 }
                 for skill in skills

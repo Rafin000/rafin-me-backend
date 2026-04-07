@@ -5,7 +5,7 @@ from project.server.models.models import Users
 from project.server.api.user.schema import *
 from project.server.api.user import ns_user
 from project.server import db
-from project.server.utils import error_response
+from project.server.utils import error_response, asset_url
 
 class UserList(Resource):
     @jwt_required()
@@ -39,13 +39,13 @@ class UserList(Resource):
             users = Users.query.all()
             serialized_users = [
                 {
-                    'id': str(user.id), 
+                    'id': str(user.id),
                     'username': user.username,
                     'full_name': user.full_name,
                     'designation': user.designation,
                     'about': user.about,
-                    'cv_link': user.cv_link,
-                    'profile_picture_link': user.profile_picture_link,
+                    'cv_link': asset_url(user.cv_link),
+                    'profile_picture_link': asset_url(user.profile_picture_link),
                     'skills': user.skills
                 } for user in users
             ]
@@ -65,30 +65,30 @@ class User(Resource):
                 return error_response(400, "User not found")
 
             serialized_user = {
-                'id': str(user.id), 
+                'id': str(user.id),
                 'username': user.username,
                 'full_name': user.full_name,
                 'designation': user.designation,
                 'about': user.about,
-                'cv_link': user.cv_link,
-                'profile_picture_link': user.profile_picture_link,
+                'cv_link': asset_url(user.cv_link),
+                'profile_picture_link': asset_url(user.profile_picture_link),
                 'skills': [
                     {
-                        'id': str(skill.id),  
+                        'id': str(skill.id),
                         'skill': skill.skill,
-                        'icon_link': skill.icon_link,
-                        'user_id': str(skill.user_id)  
+                        'icon_link': asset_url(skill.icon_link),
+                        'user_id': str(skill.user_id)
                     } for skill in user.user_skills
                 ],
                 'testimonials': [
                     {
-                        'id': str(testimonial.id),  
+                        'id': str(testimonial.id),
                         'name': testimonial.name,
-                        'date': testimonial.date.isoformat(),  
+                        'date': testimonial.date.isoformat(),
                         'designation': testimonial.designation,
                         'content': testimonial.content,
                         'company': testimonial.company,
-                        'image_link': testimonial.image_link
+                        'image_link': asset_url(testimonial.image_link)
                     } for testimonial in user.testimonials
                 ],
                 'social_media_links': {
