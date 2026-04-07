@@ -1,6 +1,6 @@
 from flask import request, current_app as app
 from flask_restx import Resource
-from project.server.decorators import check_apikey
+from flask_jwt_extended import jwt_required
 from project.server.models.models import SocialMediaLinks
 from project.server.api.social.schema import *
 from project.server.api.social import ns_social
@@ -9,7 +9,7 @@ from project.server.utils import error_response
 
 
 class SocialMediaLinksList(Resource):
-    @check_apikey
+    @jwt_required()
     @ns_social.expect(create_social_media_links_model, validate=True)
     @ns_social.response(201, "Successfully Created Social Media Link")
     @ns_social.response(400, "Unable to Create Social Media Link")
@@ -74,7 +74,7 @@ class SocialMediaLink(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Retrieve Social Media Link")
 
-    @check_apikey
+    @jwt_required()
     @ns_social.expect(update_social_media_links_model, validate=True)
     @ns_social.response(200, "Successfully Updated Social Media Link")
     @ns_social.response(400, "Unable to Update Social Media Link")
@@ -97,7 +97,7 @@ class SocialMediaLink(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Update Social Media Link")
 
-    @check_apikey
+    @jwt_required()
     @ns_social.response(200, "Successfully Deleted Social Media Link")
     @ns_social.response(400, "Unable to Delete Social Media Link")
     def delete(self, link_id):

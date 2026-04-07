@@ -6,12 +6,14 @@ from flask_mail import Mail
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 
 cors = CORS()
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 migrate = Migrate()
 mail = Mail()
+jwt = JWTManager()
 
 def create_app():
     app = Flask(__name__)
@@ -27,6 +29,7 @@ def create_app():
         migrate.init_app(app, db)
         bcrypt.init_app(app)
         mail.init_app(app)
+        jwt.init_app(app)
 
         from project.server.api import api_blog
         api_blog.init_app(app)

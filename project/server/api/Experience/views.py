@@ -1,13 +1,13 @@
 from flask import request, current_app as app
 from flask_restx import Resource
-from project.server.decorators import check_apikey
+from flask_jwt_extended import jwt_required
 from project.server.models.models import Experience
 from project.server.api.Experience import ns_experience
 from project.server import db
 from project.server.utils import error_response
 
 class ExperienceList(Resource):
-    @check_apikey
+    @jwt_required()
     def post(self):
         try:
             data = request.get_json()
@@ -66,7 +66,7 @@ class ExperienceItem(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Retrieve Experience")
 
-    @check_apikey
+    @jwt_required()
     def put(self, experience_id):
         try:
             data = request.get_json()
@@ -86,7 +86,7 @@ class ExperienceItem(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Update Experience")
 
-    @check_apikey
+    @jwt_required()
     def delete(self, experience_id):
         try:
             experience = Experience.query.filter_by(id=experience_id).first()

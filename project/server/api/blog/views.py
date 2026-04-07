@@ -1,7 +1,7 @@
 from flask import current_app as app, request
 from flask_restx import Resource
 from project.server.api.blog import ns_blog
-from project.server.decorators import check_apikey
+from flask_jwt_extended import jwt_required
 from project.server.models.models import Blogs
 from project.server.api.blog.schema import *
 from project.server import db
@@ -22,7 +22,7 @@ class Alive(Resource):
         return response_object, 200
 
 class BlogList(Resource):
-    @check_apikey
+    @jwt_required()
     @ns_blog.expect(create_blog_model, validate=True)
     @ns_blog.response(200, "Successfully Created Blog")
     @ns_blog.response(400, "Unable to Create Blog")
@@ -128,7 +128,7 @@ class Blog(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Retrieve Blog")
         
-    @check_apikey
+    @jwt_required()
     @ns_blog.expect(update_blog_model, validate=True)
     @ns_blog.response(200, "Successfully Updated Blog")
     @ns_blog.response(400, "Unable to Update Blog")
@@ -158,7 +158,7 @@ class Blog(Resource):
             return error_response(400, "Unable to Update Blog")
 
 
-    @check_apikey
+    @jwt_required()
     @ns_blog.response(200, "Successfully Deleted Blog")
     @ns_blog.response(400, "Unable to Delete Blog")
     def delete(self, blog_id):
@@ -178,8 +178,7 @@ class Blog(Resource):
             app.logger.error(e)
             return error_response(400, "Unable to Delete Blog")
 
-class BlogLike(Resource):   
-    @check_apikey
+class BlogLike(Resource):
     @ns_blog.response(200, "Successfully Liked Blog")
     @ns_blog.response(400, "Unable to Like Blog")
     def post(self, blog_id):

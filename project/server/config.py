@@ -1,13 +1,7 @@
 # project/server/config.py
 
 import os
-
-
-def _required(name: str) -> str:
-    value = os.environ.get(name)
-    if not value:
-        raise RuntimeError(f"Required environment variable {name} is not set")
-    return value
+from datetime import timedelta
 
 
 POSTGRES_SERVER_NAME = os.environ.get('POSTGRES_SERVER_NAME', 'localhost')
@@ -22,7 +16,8 @@ database_name = POSTGRES_DB
 class BaseConfig:
     """Base configuration."""
     SECRET_KEY = os.environ.get('SECRET_KEY')
-    API_KEY = os.environ.get('API_KEY')
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
     DEBUG = False
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
@@ -55,7 +50,6 @@ class ProductionConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = postgres_base + database_name
 
     def __init__(self):
-        # Fail fast in production if required secrets are missing.
-        for name in ('SECRET_KEY', 'API_KEY', 'POSTGRES_PASSWORD'):
+        for name in ('SECRET_KEY', 'JWT_SECRET_KEY', 'POSTGRES_PASSWORD'):
             if not os.environ.get(name):
                 raise RuntimeError(f"Required environment variable {name} is not set")

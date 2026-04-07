@@ -40,6 +40,7 @@ class Users(db.Model):
     about = Column(String, nullable=True)
     cv_link = Column(String, nullable=True)
     profile_picture_link = Column(String, nullable=True)
+    password_hash = Column(String(255), nullable=True)
 
     testimonials = db.relationship('Testimonials', backref='user_testimonials', lazy=True)
     social_media_links = db.relationship('SocialMediaLinks', backref='user_social_links', lazy=True)

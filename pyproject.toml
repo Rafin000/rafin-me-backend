@@ -41,6 +41,7 @@ urllib3 = "2.2.2"
 werkzeug = "3.0.3"
 gunicorn = "^23.0.0"
 flask-mail = "^0.10.0"
+flask-jwt-extended = "^4.6.0"
 
 
 [build-system]

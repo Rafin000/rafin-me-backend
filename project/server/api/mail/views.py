@@ -3,7 +3,6 @@ from flask import current_app as app
 from flask_restx import Resource
 from project.server.api.mail.schema import mail_model
 from project.server.api.mail import ns_mail
-from project.server.decorators import check_apikey
 from project.server.utils import error_response
 from flask_mail import Message
 from project.server import mail
