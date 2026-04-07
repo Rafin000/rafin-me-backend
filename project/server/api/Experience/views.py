@@ -28,7 +28,9 @@ class ExperienceList(Resource):
     # @check_apikey
     def get(self):
         try:
-            experience_list = Experience.query.all()
+            # Newest first — "year" is a string like "2024" or "2023 - Present";
+            # lexicographic descending puts the most recent at the top.
+            experience_list = Experience.query.order_by(Experience.year.desc()).all()
             serialized_experience = [
                 {
                     'id': str(experience.id),

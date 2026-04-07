@@ -28,7 +28,8 @@ class EducationList(Resource):
     # @check_apikey
     def get(self):
         try:
-            education_list = Education.query.all()
+            # Newest first — mirrors the Experience ordering.
+            education_list = Education.query.order_by(Education.year.desc()).all()
             serialized_education = [
                 {
                     'id': str(education.id),
