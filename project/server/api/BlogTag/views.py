@@ -2,7 +2,7 @@ from flask_restx import Namespace, Resource
 from flask import request
 from flask import current_app as app
 from project.server import db
-from project.server.docorators import check_apikey
+from project.server.decorators import check_apikey
 from project.server.models.models import Blogs
 from project.server.utils import error_response
 

@@ -1,6 +1,6 @@
 from flask import request, current_app as app
 from flask_restx import Resource
-from project.server.docorators import check_apikey
+from project.server.decorators import check_apikey
 from project.server.models.models import Testimonials
 from project.server.api.testimonial.schema import *
 from project.server.api.testimonial import ns_testimonial

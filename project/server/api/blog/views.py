@@ -1,7 +1,7 @@
 from flask import current_app as app, request
 from flask_restx import Resource
 from project.server.api.blog import ns_blog
-from project.server.docorators import check_apikey
+from project.server.decorators import check_apikey
 from project.server.models.models import Blogs
 from project.server.api.blog.schema import *
 from project.server import db
