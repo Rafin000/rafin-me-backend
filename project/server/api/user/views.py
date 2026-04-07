@@ -105,7 +105,7 @@ class User(Resource):
                         'position' : experience.position,
                         'company' : experience.company,
                         'contributions' : [contribution for contribution in experience.work_details]
-                    } for experience in user.experience
+                    } for experience in sorted(user.experience, key=lambda e: e.year or '', reverse=True)
                 ],
                 'education' : [
                     {
@@ -115,7 +115,7 @@ class User(Resource):
                         'degree' : education.degree,
                         'university' : education.university,
                         'cgpa' : education.cgpa,
-                    } for education in user.education
+                    } for education in sorted(user.education, key=lambda e: e.year or '', reverse=True)
                 ]
             }
             return {"message": "Successfully Retrieved User", "data": serialized_user}, 200
