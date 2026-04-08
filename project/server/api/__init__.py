@@ -10,6 +10,7 @@ from flask_jwt_extended.exceptions import (
     UserLookupError,
 )
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+from flask_limiter.errors import RateLimitExceeded
 
 from project.server.api.blog.views import ns_blog
 from project.server.api.user.views import ns_user
@@ -87,3 +88,11 @@ def _handle_expired(error):
 @api_blog.errorhandler(InvalidTokenError)
 def _handle_invalid_token(error):
     return {"message": "Invalid token"}, 401
+
+
+@api_blog.errorhandler(RateLimitExceeded)
+def _handle_rate_limit(error):
+    return {
+        "message": "Too many requests. Please slow down and try again later.",
+        "detail": str(getattr(error, 'description', '')) or None,
+    }, 429
