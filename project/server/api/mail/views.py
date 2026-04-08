@@ -31,19 +31,18 @@ class MailResource(Resource):
                 )
                 return error_response(400, 'Mail service not configured')
 
-            body = (
-                f"You received a new message from rafin.dev contact form.\n\n"
-                f"From: {name} <{sender_mail}>\n"
-                f"---\n"
-                f"{message}\n"
-            )
-
+            # Standard contact-form pattern:
+            #   From:      "<visitor> via rafin.dev" + verified sender email
+            #              (SendGrid rejects unverified From addresses)
+            #   Reply-To:  the visitor, so hitting Reply in the inbox replies
+            #              to them directly.
+            #   Body:      just the message the visitor typed.
             msg = Message(
                 subject=f"[rafin.dev] Message from {name}",
-                sender=default_sender,      # must be a verified sender at the provider
+                sender=(f"{name} via rafin.dev", default_sender),
                 recipients=[recipient],
-                reply_to=sender_mail,       # so "Reply" goes back to the visitor
-                body=body,
+                reply_to=(name, sender_mail),
+                body=message,
             )
             mail.send(msg)
             return {"status": "success", "message": "Mail sent"}, 200
