@@ -10,7 +10,10 @@ from project.server.utils import error_response, asset_url
 
 
 ALLOWED_EXTENSIONS = {
+    # images
     '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg',
+    # documents (CV, etc.)
+    '.pdf',
 }
 
 upload_parser = ns_uploads.parser()
@@ -19,7 +22,18 @@ upload_parser.add_argument(
     location='files',
     type=FileStorage,
     required=True,
-    help='Image file to upload',
+    help='File to upload (image or PDF)',
+)
+upload_parser.add_argument(
+    'key',
+    location='args',
+    type=str,
+    required=False,
+    help=(
+        'Optional fixed S3 key. When provided, the upload overwrites the '
+        'object at exactly this key (bypassing the UUID + prefix). Use this '
+        'for slots that need a stable URL (e.g. cv.pdf).'
+    ),
 )
 
 
@@ -71,10 +85,27 @@ class UploadResource(Resource):
                 f'Unsupported file type: {ext}. Allowed: {sorted(ALLOWED_EXTENSIONS)}',
             )
 
-        # Generate a UUID-based key so we never collide
-        key_filename = f'{uuid.uuid4().hex}{ext}'
-        prefix = (app.config.get('S3_UPLOAD_PREFIX') or '').strip('/')
-        full_key = f'{prefix}/{key_filename}' if prefix else key_filename
+        explicit_key = (args.get('key') or '').strip().lstrip('/')
+        if explicit_key:
+            # Validate fixed-key uploads to avoid path traversal
+            if '..' in explicit_key or '\\' in explicit_key:
+                return error_response(400, 'Invalid key')
+            key_ext = os.path.splitext(explicit_key)[1].lower()
+            if key_ext not in ALLOWED_EXTENSIONS:
+                return error_response(
+                    400,
+                    f'Key must end with one of: {sorted(ALLOWED_EXTENSIONS)}',
+                )
+            full_key = explicit_key
+            # Fixed-key uploads need to be re-fetchable after a replacement,
+            # so use a short cache window instead of "immutable".
+            cache_control = 'public, max-age=60, must-revalidate'
+        else:
+            # Generate a UUID-based key so we never collide
+            key_filename = f'{uuid.uuid4().hex}{ext}'
+            prefix = (app.config.get('S3_UPLOAD_PREFIX') or '').strip('/')
+            full_key = f'{prefix}/{key_filename}' if prefix else key_filename
+            cache_control = 'public, max-age=31536000, immutable'
 
         content_type = file.content_type or 'application/octet-stream'
 
@@ -85,7 +116,7 @@ class UploadResource(Resource):
                 full_key,
                 ExtraArgs={
                     'ContentType': content_type,
-                    'CacheControl': 'public, max-age=31536000, immutable',
+                    'CacheControl': cache_control,
                 },
             )
         except Exception as e:
