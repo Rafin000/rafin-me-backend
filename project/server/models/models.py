@@ -47,6 +47,7 @@ class Users(db.Model):
     user_skills = db.relationship('UserSkills', backref='user_skills', lazy=True)
     education = db.relationship('Education', backref='user_education', lazy=True, cascade="all, delete-orphan")
     experience = db.relationship('Experience', backref='user_experience', lazy=True, cascade="all, delete-orphan")
+    projects = db.relationship('Projects', backref='user_projects', lazy=True)
 
     def __init__(self, full_name, username, designation, about=None, skills=None, cv_link=None, profile_picture_link=None):
         self.full_name = full_name
@@ -163,3 +164,25 @@ class Experience(db.Model):
         self.position = position
         self.company = company
         self.work_details = work_details
+
+
+class Projects(db.Model):
+    __tablename__ = 'projects'
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    tech_stack = Column(ARRAY(String), default=[])
+    github_link = Column(String, nullable=True)
+    live_link = Column(String, nullable=True)
+    thumbnail_url = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    def __init__(self, user_id, title, description=None, tech_stack=None, github_link=None, live_link=None, thumbnail_url=None):
+        self.user_id = user_id
+        self.title = title
+        self.description = description
+        self.tech_stack = tech_stack if tech_stack else []
+        self.github_link = github_link
+        self.live_link = live_link
+        self.thumbnail_url = thumbnail_url

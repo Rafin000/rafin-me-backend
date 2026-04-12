@@ -23,6 +23,7 @@ from project.server.api.Education.views import ns_education
 from project.server.api.Experience.views import ns_experience
 from project.server.api.auth.views import ns_auth
 from project.server.api.uploads.views import ns_uploads
+from project.server.api.projects.views import ns_projects
 
 api_blog = Api(version='1.0', title='Blog Service API', prefix='/api/v1', doc='/docs')
 api_blog.add_namespace(ns_blog, path='/blogs')
@@ -36,6 +37,7 @@ api_blog.add_namespace(ns_education, path='/education')
 api_blog.add_namespace(ns_experience, path='/experience')
 api_blog.add_namespace(ns_auth, path='/auth')
 api_blog.add_namespace(ns_uploads, path='/uploads')
+api_blog.add_namespace(ns_projects, path='/projects')
 
 
 # Translate flask-jwt-extended exceptions into proper HTTP responses

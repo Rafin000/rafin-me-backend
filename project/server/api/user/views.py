@@ -116,6 +116,19 @@ class User(Resource):
                         'university' : education.university,
                         'cgpa' : education.cgpa,
                     } for education in sorted(user.education, key=lambda e: e.year or '', reverse=True)
+                ],
+                'projects': [
+                    {
+                        'id': str(project.id),
+                        'user_id': str(project.user_id),
+                        'title': project.title,
+                        'description': project.description,
+                        'tech_stack': project.tech_stack or [],
+                        'github_link': project.github_link,
+                        'live_link': project.live_link,
+                        'thumbnail_url': asset_url(project.thumbnail_url),
+                        'created_at': project.created_at.timestamp(),
+                    } for project in user.projects
                 ]
             }
             return {"message": "Successfully Retrieved User", "data": serialized_user}, 200
