@@ -172,16 +172,18 @@ class Projects(db.Model):
     user_id = Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
+    year = Column(String(255), nullable=True)
     tech_stack = Column(ARRAY(String), default=[])
     github_link = Column(String, nullable=True)
     live_link = Column(String, nullable=True)
     thumbnail_url = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    def __init__(self, user_id, title, description=None, tech_stack=None, github_link=None, live_link=None, thumbnail_url=None):
+    def __init__(self, user_id, title, description=None, year=None, tech_stack=None, github_link=None, live_link=None, thumbnail_url=None):
         self.user_id = user_id
         self.title = title
         self.description = description
+        self.year = year
         self.tech_stack = tech_stack if tech_stack else []
         self.github_link = github_link
         self.live_link = live_link

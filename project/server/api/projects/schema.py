@@ -5,6 +5,7 @@ create_project_type = Model('CreateProject', {
     'user_id': fields.String(required=True, description='The user ID'),
     'title': fields.String(required=True, description='The project title'),
     'description': fields.String(description='The project description'),
+    'year': fields.String(description='Year or date range, e.g. "2024" or "Jan 2024 - Present"'),
     'tech_stack': fields.List(fields.String, description='List of technologies used'),
     'github_link': fields.String(description='Link to the GitHub repository'),
     'live_link': fields.String(description='Link to the live project'),
@@ -14,6 +15,7 @@ create_project_type = Model('CreateProject', {
 update_project_type = Model('UpdateProject', {
     'title': fields.String(description='The project title'),
     'description': fields.String(description='The project description'),
+    'year': fields.String(description='Year or date range'),
     'tech_stack': fields.List(fields.String, description='List of technologies used'),
     'github_link': fields.String(description='Link to the GitHub repository'),
     'live_link': fields.String(description='Link to the live project'),

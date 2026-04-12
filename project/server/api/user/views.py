@@ -123,6 +123,7 @@ class User(Resource):
                         'user_id': str(project.user_id),
                         'title': project.title,
                         'description': project.description,
+                        'year': project.year,
                         'tech_stack': project.tech_stack or [],
                         'github_link': project.github_link,
                         'live_link': project.live_link,
