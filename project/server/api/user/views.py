@@ -124,6 +124,7 @@ class User(Resource):
                         'title': project.title,
                         'description': project.description,
                         'year': project.year,
+                        'contributions': project.contributions or [],
                         'tech_stack': project.tech_stack or [],
                         'github_link': project.github_link,
                         'live_link': project.live_link,

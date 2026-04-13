@@ -15,6 +15,7 @@ def serialize_project(project):
         'title': project.title,
         'description': project.description,
         'year': project.year,
+        'contributions': project.contributions or [],
         'tech_stack': project.tech_stack or [],
         'github_link': project.github_link,
         'live_link': project.live_link,
@@ -56,6 +57,7 @@ class ProjectsListResource(Resource):
                 title=title,
                 description=data.get('description'),
                 year=data.get('year'),
+                contributions=data.get('contributions', []),
                 tech_stack=data.get('tech_stack', []),
                 github_link=data.get('github_link'),
                 live_link=data.get('live_link'),
@@ -98,6 +100,7 @@ class ProjectResource(Resource):
             project.title = data.get('title', project.title)
             project.description = data.get('description', project.description)
             project.year = data.get('year', project.year)
+            project.contributions = data.get('contributions', project.contributions)
             project.tech_stack = data.get('tech_stack', project.tech_stack)
             project.github_link = data.get('github_link', project.github_link)
             project.live_link = data.get('live_link', project.live_link)
