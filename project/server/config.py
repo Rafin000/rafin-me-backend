@@ -28,7 +28,7 @@ class BaseConfig:
     AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
     S3_BUCKET = os.environ.get('S3_BUCKET', '')
     S3_UPLOAD_PREFIX = os.environ.get('S3_UPLOAD_PREFIX', 'rafin-assets')
-    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10 MB upload cap
+    MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50 MB upload cap (videos can be large)
     DEBUG = False
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')

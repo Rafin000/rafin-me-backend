@@ -14,6 +14,8 @@ ALLOWED_EXTENSIONS = {
     '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg',
     # documents (CV, etc.)
     '.pdf',
+    # videos (project demos)
+    '.mp4', '.webm',
 }
 
 upload_parser = ns_uploads.parser()
