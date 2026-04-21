@@ -41,6 +41,9 @@ class Users(db.Model):
     cv_link = Column(String, nullable=True)
     profile_picture_link = Column(String, nullable=True)
     password_hash = Column(String(255), nullable=True)
+    email = Column(String(255), unique=True, nullable=True)
+    reset_code_hash = Column(String(255), nullable=True)
+    reset_code_expires_at = Column(DateTime, nullable=True)
 
     testimonials = db.relationship('Testimonials', backref='user_testimonials', lazy=True)
     social_media_links = db.relationship('SocialMediaLinks', backref='user_social_links', lazy=True)
