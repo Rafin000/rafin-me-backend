@@ -39,13 +39,13 @@ class UserSkillsListResource(Resource):
     @ns_user_skill.response(400, "Unable to Retrieve Skills")
     def get(self):
         try:
-            data = request.get_json()
-            user_id = data.get('user_id')
-            user = Users.query.filter_by(id=user_id).first()
-            if not user:
-                return error_response(404, "User not found")
-
-            skills = UserSkills.query.filter_by(user_id=user_id).all()
+            # Public endpoint: return all skills, mirroring the Experience/Education
+            # GET handlers. Optionally filter by ?user_id=... if provided as a query param.
+            user_id = request.args.get('user_id')
+            query = UserSkills.query
+            if user_id:
+                query = query.filter_by(user_id=user_id)
+            skills = query.all()
             skills_list = [
                 {
                     'id': str(skill.id),
@@ -59,7 +59,7 @@ class UserSkillsListResource(Resource):
             return skills_list, 200
 
         except Exception as e:
-            app.logger.error(f"Error retrieving skills for user_id {user_id}: {e}")
+            app.logger.error(f"Error retrieving skills: {e}")
             return error_response(400, "Unable to Retrieve Skills")
 
 class UserSkillsResource(Resource):
