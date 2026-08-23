@@ -9,8 +9,12 @@ POSTGRES_USER = os.environ.get('POSTGRES_USER', 'postgres')
 POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', '')
 POSTGRES_DB = os.environ.get('POSTGRES_DB', 'blogdb')
 
-postgres_base = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER_NAME}:5432/'
-database_name = POSTGRES_DB
+POSTGRES_PORT = os.environ.get('POSTGRES_PORT', '5432')
+# Managed Postgres (Neon, Supabase, Cloud SQL) requires TLS; local docker does not.
+POSTGRES_SSLMODE = os.environ.get('POSTGRES_SSLMODE', '')
+
+postgres_base = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER_NAME}:{POSTGRES_PORT}/'
+database_name = POSTGRES_DB + (f'?sslmode={POSTGRES_SSLMODE}' if POSTGRES_SSLMODE else '')
 
 
 class BaseConfig:
@@ -28,6 +32,9 @@ class BaseConfig:
     AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
     S3_BUCKET = os.environ.get('S3_BUCKET', '')
     S3_UPLOAD_PREFIX = os.environ.get('S3_UPLOAD_PREFIX', 'rafin-assets')
+    # Optional S3-compatible endpoint (Google Cloud Storage, Cloudflare R2,
+    # MinIO). Left empty, boto3 talks to AWS S3 as before.
+    S3_ENDPOINT_URL = os.environ.get('S3_ENDPOINT_URL', '')
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50 MB upload cap (videos can be large)
     DEBUG = False
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
@@ -43,6 +50,15 @@ class BaseConfig:
     MAIL_RECIPIENT = os.environ.get('MAIL_RECIPIENT')
     BCRYPT_LOG_ROUNDS = 13
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Serverless Postgres (Neon) drops idle connections, and a warm Cloud Run
+    # container will otherwise keep using a socket the server has already
+    # closed, failing with "SSL connection has been closed unexpectedly".
+    # pre_ping checks the connection is alive before handing it out; recycle
+    # retires it well before the provider's idle timeout.
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 280,
+    }
 
 
 class DevelopmentConfig(BaseConfig):
