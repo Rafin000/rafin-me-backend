@@ -51,11 +51,29 @@ def _get_s3_client():
     if not (access_key and secret_key and bucket):
         return None, None
 
+    endpoint_url = app.config.get('S3_ENDPOINT_URL') or None
+
+    # boto3 >= 1.36 adds flexible-checksum headers to every upload. S3 accepts
+    # them; other S3-compatible APIs (Google Cloud Storage, some MinIO builds)
+    # reject the request with SignatureDoesNotMatch. Only disable them when we
+    # are pointed at a non-AWS endpoint, so AWS uploads keep their integrity
+    # checks.
+    config = None
+    if endpoint_url:
+        from botocore.config import Config
+
+        config = Config(
+            request_checksum_calculation='when_required',
+            response_checksum_validation='when_supported',
+        )
+
     client = boto3.client(
         's3',
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
         region_name=region,
+        endpoint_url=endpoint_url,
+        config=config,
     )
     return client, bucket
 
