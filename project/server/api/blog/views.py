@@ -54,8 +54,10 @@ class BlogList(Resource):
                 "message" : "Successfully Created Blog"
             }, 200
         except Exception as e:
-            app.logger.info(e)
-            return error_response(400, "Unable to Create Blog")
+            # Log at error level with a traceback so the cause reaches the
+            # platform log stream; app.logger.info was being filtered out.
+            app.logger.exception("Blog create failed: %s", e)
+            return error_response(400, f"Unable to Create Blog: {e}")
         
 
     # @check_apikey
